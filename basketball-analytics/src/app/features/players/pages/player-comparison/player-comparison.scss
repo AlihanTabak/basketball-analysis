@@ -1,0 +1,334 @@
+:host {
+  display: block;
+}
+
+.comparison-page {
+  min-height: 100vh;
+  padding: 36px;
+
+  background: #0b0d10;
+  color: #f5f7fa;
+}
+
+.comparison-header {
+  margin-bottom: 28px;
+}
+
+.eyebrow,
+.panel-label {
+  margin: 0 0 8px;
+
+  color: #858e9b;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.16em;
+}
+
+h1 {
+  margin: 0;
+
+  font-size: 48px;
+}
+
+.players {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    70px
+    minmax(0, 1fr);
+
+  align-items: stretch;
+
+  gap: 14px;
+
+  margin-bottom: 14px;
+}
+
+.player-card,
+.comparison-panel,
+.basic-stats {
+  border: 1px solid #252a31;
+  border-radius: 18px;
+
+  background: #14171c;
+}
+
+.player-card {
+  padding: 26px;
+
+  h2 {
+    margin: 8px 0 6px;
+
+    font-size: 28px;
+  }
+
+  p {
+    margin: 0;
+
+    color: #9099a6;
+  }
+
+  &.right {
+    text-align: right;
+  }
+}
+
+.player-side {
+  color: #7e8794;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.14em;
+}
+
+.vs {
+  display: grid;
+  place-items: center;
+
+  color: #6f7782;
+
+  font-weight: 800;
+}
+
+.basic-stats {
+  margin-bottom: 14px;
+  padding: 12px 24px;
+}
+
+.comparison-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    100px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  padding: 14px 0;
+
+  border-bottom: 1px solid #252a31;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  strong {
+    font-size: 20px;
+
+    &:last-child {
+      text-align: right;
+    }
+  }
+
+  span {
+    text-align: center;
+
+    color: #858e9b;
+
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.comparison-panel {
+  padding: 26px;
+
+  h2 {
+    margin: 0 0 28px;
+
+    font-size: 24px;
+  }
+}
+
+.metric-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    90px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 16px 0;
+
+  border-top: 1px solid #252a31;
+}
+
+.comparison-selector {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    auto;
+
+  align-items: end;
+
+  gap: 14px;
+
+  margin-bottom: 18px;
+
+  padding: 18px;
+
+  border: 1px solid #252a31;
+  border-radius: 16px;
+
+  background: #14171c;
+}
+
+.selector-field {
+  display: grid;
+  gap: 8px;
+
+  label {
+    color: #8d96a4;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  select {
+    width: 100%;
+
+    padding: 11px 12px;
+
+    border: 1px solid #303640;
+    border-radius: 10px;
+
+    outline: none;
+
+    background: #0f1216;
+    color: #f5f7fa;
+  }
+}
+
+.compare-button {
+  height: 42px;
+
+  padding: 0 22px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background: #f5f7fa;
+  color: #0b0d10;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 850px) {
+
+  .comparison-selector {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-name {
+  text-align: center;
+
+  font-size: 13px;
+}
+
+.metric-value {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 8px;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  span {
+    color: #8d96a4;
+
+    font-size: 12px;
+  }
+}
+
+.left .metric-value {
+  flex-direction: row-reverse;
+}
+
+.bar {
+  height: 8px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #252a31;
+}
+
+.fill {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: #f5f7fa;
+
+  transition: width 250ms ease;
+
+  &.usage {
+    opacity: 0.65;
+  }
+}
+
+.reverse {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.state {
+  display: grid;
+  place-items: center;
+
+  min-height: 70vh;
+
+  color: #939ca8;
+
+  &.error {
+    color: #ff8a8a;
+  }
+}
+
+@media (max-width: 900px) {
+
+  .players {
+    grid-template-columns: 1fr;
+  }
+
+  .vs {
+    padding: 10px;
+  }
+
+  .player-card.right {
+    text-align: left;
+  }
+
+  .metric-row {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-name {
+    order: -1;
+  }
+}
+

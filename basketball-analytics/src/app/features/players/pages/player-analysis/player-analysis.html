@@ -1,0 +1,966 @@
+<div class="page">
+
+  @if (loading()) {
+
+    <div class="state">
+      Oyuncu yükleniyor...
+    </div>
+
+  } @else if (error()) {
+
+    <div class="state error">
+      {{ error() }}
+    </div>
+
+  } @else if (player(); as p) {
+
+    <!-- =====================================================
+         PLAYER HEADER
+    ====================================================== -->
+
+    <section class="player-header">
+
+      <div class="player-identity">
+
+        @if (p.team_logo_url) {
+
+          <img
+            class="team-logo"
+            [src]="p.team_logo_url"
+            [alt]="p.team_name"
+            (error)="onLogoError($event)"
+          />
+
+        }
+
+        <div>
+
+          <p class="eyebrow">
+            PLAYER ANALYSIS
+          </p>
+
+          <h1>
+            {{ p.player_name }}
+          </h1>
+
+          <p class="meta">
+            {{ p.team_name }}
+            ·
+            {{ p.season }}
+            ·
+            {{ p.games }} Games
+            ·
+            {{ formatValue(p.average_minutes) }} MPG
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="archetypes">
+
+        @for (
+          archetype of p.archetypes;
+          track archetype
+        ) {
+
+          <span>
+            {{ archetype }}
+          </span>
+
+        }
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         BASIC KPI
+    ====================================================== -->
+
+    <section class="kpi-grid">
+
+      <div class="kpi">
+
+        <span>
+          PPG
+        </span>
+
+        <strong>
+          {{ formatValue(p.stats.ppg) }}
+        </strong>
+
+      </div>
+
+
+      <div class="kpi">
+
+        <span>
+          RPG
+        </span>
+
+        <strong>
+          {{ formatValue(p.stats.rpg) }}
+        </strong>
+
+      </div>
+
+
+      <div class="kpi">
+
+        <span>
+          APG
+        </span>
+
+        <strong>
+          {{ formatValue(p.stats.apg) }}
+        </strong>
+
+      </div>
+
+
+      <div class="kpi">
+
+        <span>
+          TS%
+        </span>
+
+        <strong>
+          {{ formatPercent(p.stats.ts_pct) }}
+        </strong>
+
+      </div>
+
+
+      <div class="kpi">
+
+        <span>
+          USG%
+        </span>
+
+        <strong>
+          {{ formatPercent(p.stats.usg_pct) }}
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAIN ANALYSIS PANELS
+    ====================================================== -->
+
+    <section class="content-grid">
+
+
+      <!-- ===================================================
+           SCORING
+      ==================================================== -->
+
+      <article class="panel">
+
+        <p class="panel-label">
+          SCORING
+        </p>
+
+        <h2>
+          Efficiency & Usage
+        </h2>
+
+
+        <!-- =================================================
+             TS%
+        ================================================== -->
+
+        <div class="percentile-metric">
+
+          <div class="percentile-head">
+
+            <div>
+
+              <span>
+                TS%
+              </span>
+
+              <strong>
+                {{ formatPercent(p.stats.ts_pct) }}
+              </strong>
+
+            </div>
+
+
+            <b>
+
+              {{ formatPercentile(p.percentiles.ts) }}
+
+              ·
+
+              {{ formatTopPercent(p.percentiles.ts) }}
+
+              ·
+
+              {{
+                formatRank(
+                  p.percentiles.ts_rank,
+                  p.percentiles.player_count
+                )
+              }}
+
+            </b>
+
+          </div>
+
+
+          <div class="league-reference">
+
+            <span>
+              Lig Ort.
+              {{ formatPercent(p.league_averages.ts) }}
+            </span>
+
+            <strong
+              [class]="differenceClass(
+                p.stats.ts_pct,
+                p.league_averages.ts,
+                'higher-better'
+              )"
+            >
+              {{
+                formatDifference(
+                  p.stats.ts_pct,
+                  p.league_averages.ts
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                p.percentiles.ts
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             eFG%
+        ================================================== -->
+
+        <div class="percentile-metric">
+
+          <div class="percentile-head">
+
+            <div>
+
+              <span>
+                eFG%
+              </span>
+
+              <strong>
+                {{ formatPercent(p.stats.efg_pct) }}
+              </strong>
+
+            </div>
+
+
+            <b>
+
+              {{ formatPercentile(p.percentiles.efg) }}
+
+              ·
+
+              {{ formatTopPercent(p.percentiles.efg) }}
+
+              ·
+
+              {{
+                formatRank(
+                  p.percentiles.efg_rank,
+                  p.percentiles.player_count
+                )
+              }}
+
+            </b>
+
+          </div>
+
+
+          <div class="league-reference">
+
+            <span>
+              Lig Ort.
+              {{ formatPercent(p.league_averages.efg) }}
+            </span>
+
+            <strong
+              [class]="differenceClass(
+                p.stats.efg_pct,
+                p.league_averages.efg,
+                'higher-better'
+              )"
+            >
+              {{
+                formatDifference(
+                  p.stats.efg_pct,
+                  p.league_averages.efg
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                p.percentiles.efg
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             USG%
+        ================================================== -->
+
+        <div class="percentile-metric">
+
+          <div class="percentile-head">
+
+            <div>
+
+              <span>
+                USG%
+              </span>
+
+              <strong>
+                {{ formatPercent(p.stats.usg_pct) }}
+              </strong>
+
+            </div>
+
+
+            <b>
+
+              {{ formatPercentile(p.percentiles.usg) }}
+
+              ·
+
+              {{ formatTopPercent(p.percentiles.usg) }}
+
+              ·
+
+              {{
+                formatRank(
+                  p.percentiles.usg_rank,
+                  p.percentiles.player_count
+                )
+              }}
+
+            </b>
+
+          </div>
+
+
+          <div class="league-reference">
+
+            <span>
+              Lig Ort.
+              {{ formatPercent(p.league_averages.usg) }}
+            </span>
+
+            <strong
+              [class]="differenceClass(
+                p.stats.usg_pct,
+                p.league_averages.usg,
+                'neutral'
+              )"
+            >
+              {{
+                formatDifference(
+                  p.stats.usg_pct,
+                  p.league_averages.usg
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill usage"
+              [style.width]="percentileWidth(
+                p.percentiles.usg
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TOV%
+        ================================================== -->
+
+        <div class="percentile-metric">
+
+          <div class="percentile-head">
+
+            <div>
+
+              <span>
+                TOV%
+              </span>
+
+              <strong>
+                {{ formatPercent(p.stats.tov_pct) }}
+              </strong>
+
+            </div>
+
+
+            <b>
+
+              {{ formatPercentile(p.percentiles.tov) }}
+
+              ·
+
+              {{ formatTopPercent(p.percentiles.tov) }}
+
+              ·
+
+              {{
+                formatRank(
+                  p.percentiles.tov_rank,
+                  p.percentiles.player_count
+                )
+              }}
+
+            </b>
+
+          </div>
+
+
+          <div class="league-reference">
+
+            <span>
+              Lig Ort.
+              {{ formatPercent(p.league_averages.tov) }}
+            </span>
+
+            <strong
+              [class]="differenceClass(
+                p.stats.tov_pct,
+                p.league_averages.tov,
+                'lower-better'
+              )"
+            >
+              {{
+                formatDifference(
+                  p.stats.tov_pct,
+                  p.league_averages.tov
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                p.percentiles.tov
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- ===================================================
+           PLAYMAKING
+      ==================================================== -->
+
+      <article class="panel">
+
+        <p class="panel-label">
+          PLAYMAKING
+        </p>
+
+        <h2>
+          Creation
+        </h2>
+
+
+        <!-- =================================================
+             AST%
+        ================================================== -->
+
+        <div class="percentile-metric">
+
+          <div class="percentile-head">
+
+            <div>
+
+              <span>
+                AST%
+              </span>
+
+              <strong>
+                {{ formatPercent(p.stats.ast_pct) }}
+              </strong>
+
+            </div>
+
+
+            <b>
+
+              {{ formatPercentile(p.percentiles.ast) }}
+
+              ·
+
+              {{ formatTopPercent(p.percentiles.ast) }}
+
+              ·
+
+              {{
+                formatRank(
+                  p.percentiles.ast_rank,
+                  p.percentiles.player_count
+                )
+              }}
+
+            </b>
+
+          </div>
+
+
+          <div class="league-reference">
+
+            <span>
+              Lig Ort.
+              {{ formatPercent(p.league_averages.ast) }}
+            </span>
+
+            <strong
+              [class]="differenceClass(
+                p.stats.ast_pct,
+                p.league_averages.ast,
+                'neutral'
+              )"
+            >
+              {{
+                formatDifference(
+                  p.stats.ast_pct,
+                  p.league_averages.ast
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                p.percentiles.ast
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             AST / TOV
+        ================================================== -->
+
+        <div class="percentile-metric">
+
+          <div class="percentile-head">
+
+            <div>
+
+              <span>
+                AST / TOV
+              </span>
+
+              <strong>
+                {{ formatNumber(p.stats.ast_to) }}
+              </strong>
+
+            </div>
+
+
+            <b>
+
+              {{ formatPercentile(p.percentiles.ast_to) }}
+
+              ·
+
+              {{ formatTopPercent(p.percentiles.ast_to) }}
+
+              ·
+
+              {{
+                formatRank(
+                  p.percentiles.ast_to_rank,
+                  p.percentiles.player_count
+                )
+              }}
+
+            </b>
+
+          </div>
+
+
+          <div class="league-reference">
+
+            <span>
+              Lig Ort.
+              {{ formatNumber(p.league_averages.ast_to) }}
+            </span>
+
+            <strong
+              [class]="differenceClass(
+                p.stats.ast_to,
+                p.league_averages.ast_to,
+                'higher-better'
+              )"
+            >
+              {{
+                formatDifference(
+                  p.stats.ast_to,
+                  p.league_averages.ast_to
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                p.percentiles.ast_to
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- ===================================================
+           SHOT PROFILE
+      ==================================================== -->
+
+      <article class="panel">
+
+        <p class="panel-label">
+          SHOT PROFILE
+        </p>
+
+        <h2>
+          Shot Selection
+        </h2>
+
+
+        <!-- =================================================
+             3P ATTEMPT RATE
+        ================================================== -->
+
+        <div class="percentile-metric">
+
+          <div class="percentile-head">
+
+            <div>
+
+              <span>
+                3P Attempt Rate
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    p.stats.three_par,
+                    true
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <b>
+
+              {{ formatPercentile(p.percentiles.three_par) }}
+
+              ·
+
+              {{ formatTopPercent(p.percentiles.three_par) }}
+
+              ·
+
+              {{
+                formatRank(
+                  p.percentiles.three_par_rank,
+                  p.percentiles.player_count
+                )
+              }}
+
+            </b>
+
+          </div>
+
+
+          <div class="league-reference">
+
+            <span>
+              Lig Ort.
+              {{
+                formatPercent(
+                  p.league_averages.three_par,
+                  true
+                )
+              }}
+            </span>
+
+            <strong
+              [class]="differenceClass(
+                p.stats.three_par,
+                p.league_averages.three_par,
+                'neutral'
+              )"
+            >
+              {{
+                formatDifference(
+                  p.stats.three_par,
+                  p.league_averages.three_par
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill usage"
+              [style.width]="percentileWidth(
+                p.percentiles.three_par
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FREE THROW RATE
+        ================================================== -->
+
+        <div class="percentile-metric">
+
+          <div class="percentile-head">
+
+            <div>
+
+              <span>
+                Free Throw Rate
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    p.stats.ft_rate,
+                    true
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <b>
+
+              {{ formatPercentile(p.percentiles.ft_rate) }}
+
+              ·
+
+              {{ formatTopPercent(p.percentiles.ft_rate) }}
+
+              ·
+
+              {{
+                formatRank(
+                  p.percentiles.ft_rate_rank,
+                  p.percentiles.player_count
+                )
+              }}
+
+            </b>
+
+          </div>
+
+
+          <div class="league-reference">
+
+            <span>
+              Lig Ort.
+              {{
+                formatPercent(
+                  p.league_averages.ft_rate,
+                  true
+                )
+              }}
+            </span>
+
+            <strong
+              [class]="differenceClass(
+                p.stats.ft_rate,
+                p.league_averages.ft_rate,
+                'neutral'
+              )"
+            >
+              {{
+                formatDifference(
+                  p.stats.ft_rate,
+                  p.league_averages.ft_rate
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill usage"
+              [style.width]="percentileWidth(
+                p.percentiles.ft_rate
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- ===================================================
+           PLAYER PROFILE
+      ==================================================== -->
+
+      <article class="panel insight">
+
+        <p class="panel-label">
+          PLAYER PROFILE
+        </p>
+
+
+        <h2>
+
+          @if (p.archetypes.length > 0) {
+
+            {{ p.archetypes.join(' · ') }}
+
+          } @else {
+
+            Unclassified
+
+          }
+
+        </h2>
+
+
+        @if (p.percentiles.eligible) {
+
+          <p>
+
+            {{ p.player_name }},
+            {{ p.games }} maçta
+            {{ formatValue(p.average_minutes) }}
+            dakika ortalama ile oynadı.
+
+            Hücum kullanım oranı
+            {{ formatPercent(p.stats.usg_pct) }}
+            ve bu değer
+            {{ formatPercentile(p.percentiles.usg) }}
+            seviyesinde.
+
+            True shooting yüzdesi
+            {{ formatPercent(p.stats.ts_pct) }}
+            ile
+            {{ formatTopPercent(p.percentiles.ts) }}
+            grubunda yer alıyor.
+
+          </p>
+
+        } @else {
+
+          <p>
+
+            {{ p.player_name }} için percentile değerlendirmesi,
+            yeterli maç veya dakika örneklemi bulunmadığı için
+            henüz gösterilmiyor.
+
+          </p>
+
+        }
+
+      </article>
+
+    </section>
+
+
+    <!-- =====================================================
+         DETAILED SHOT ANALYSIS
+    ====================================================== -->
+
+    @if (shotAnalysis(); as shots) {
+
+      <app-player-shot-analysis
+        [data]="shots">
+      </app-player-shot-analysis>
+
+    }
+
+  }
+
+</div>

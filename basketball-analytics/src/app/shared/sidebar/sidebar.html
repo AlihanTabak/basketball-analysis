@@ -1,0 +1,200 @@
+<aside class="sidebar">
+
+  <div class="brand">
+    <div class="brand-mark">
+      BA
+    </div>
+
+    <div>
+      <strong>
+        Basketball
+      </strong>
+
+      <span>
+        Analytics
+      </span>
+    </div>
+  </div>
+
+
+  <nav class="navigation">
+
+    <a
+      class="nav-item"
+      [routerLink]="[
+        '/player',
+        selectedPlayerId() || 608816
+      ]"
+      [queryParams]="{
+        season: selectedSeasonId()
+      }"
+      routerLinkActive="active"
+    >
+      <span>◉</span>
+      Players
+    </a>
+
+
+    <a
+      class="nav-item"
+      [routerLink]="[
+        '/team',
+        selectedTeamId() || 2195
+      ]"
+      [queryParams]="{
+        season: selectedSeasonId()
+      }"
+      routerLinkActive="active"
+    >
+      <span>▦</span>
+      Teams
+    </a>
+
+
+    <a
+      class="nav-item"
+      [routerLink]="['/compare']"
+      [queryParams]="{
+        season: selectedSeasonId()
+      }"
+      routerLinkActive="active"
+    >
+      <span>⇄</span>
+      Compare
+    </a>
+
+
+    <button
+      class="nav-item"
+      type="button"
+    >
+      <span>⌖</span>
+      Shot Analysis
+    </button>
+
+  </nav>
+
+
+  <div class="divider"></div>
+
+
+  <section class="filters">
+
+    <p class="section-title">
+      FILTERS
+    </p>
+
+
+    <label>
+
+      Season
+
+      <select
+        [value]="selectedSeasonId()"
+        (change)="onSeasonChange($event)"
+      >
+
+        @for (
+          season of seasons();
+          track season.season_id
+        ) {
+
+          <option
+            [value]="season.season_id"
+          >
+            {{ season.season }}
+          </option>
+
+        }
+
+      </select>
+
+    </label>
+
+
+    <label>
+
+      Team
+
+      <div class="filter-action-row">
+
+        <select
+          [value]="selectedTeamId() ?? ''"
+          [disabled]="loadingTeams()"
+          (change)="onTeamChange($event)"
+        >
+
+          <option value="">
+            Select team
+          </option>
+
+          @for (
+            team of teams();
+            track team.team_id
+          ) {
+
+            <option
+              [value]="team.team_id"
+            >
+              {{ team.team_name }}
+            </option>
+
+          }
+
+        </select>
+
+
+        <button
+          class="filter-select-button"
+          type="button"
+          [disabled]="
+            !selectedTeamId()
+            || loadingTeams()
+          "
+          (click)="openSelectedTeam()"
+        >
+          SELECT
+        </button>
+
+      </div>
+
+    </label>
+
+
+    <label>
+
+      Player
+
+      <select
+        [value]="selectedPlayerId() ?? ''"
+        [disabled]="
+          loadingPlayers()
+          || !selectedTeamId()
+        "
+        (change)="onPlayerChange($event)"
+      >
+
+        <option value="">
+          Select player
+        </option>
+
+        @for (
+          player of players();
+          track player.player_id
+        ) {
+
+          <option
+            [value]="player.player_id"
+          >
+            {{ player.player_name }}
+          </option>
+
+        }
+
+      </select>
+
+    </label>
+
+  </section>
+
+</aside>

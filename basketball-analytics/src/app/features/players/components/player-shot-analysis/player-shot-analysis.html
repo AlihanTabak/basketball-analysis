@@ -1,0 +1,1141 @@
+<section class="shot-analysis">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <header class="shot-header">
+
+    <div>
+      <p class="eyebrow">
+        SHOT ANALYSIS
+      </p>
+
+      <h2>
+        Shot Profile
+      </h2>
+
+      <p class="subtitle">
+        Shot efficiency, volume and league comparison
+      </p>
+    </div>
+
+
+    <div class="total-fga">
+
+      <strong>
+        {{ data().summary.total_fga }}
+      </strong>
+
+      <span>
+        FGA
+      </span>
+
+    </div>
+
+  </header>
+
+
+
+  <!-- =====================================================
+       MAIN LAYOUT
+  ====================================================== -->
+
+  <div class="shot-layout">
+
+
+    <!-- ===================================================
+         LEFT COLUMN
+    ==================================================== -->
+
+    <div class="shot-main-column">
+
+
+      <!-- =================================================
+           COURT PANEL
+      ================================================== -->
+
+      <div class="court-panel">
+
+        <div class="court-header">
+
+          <div>
+
+            <span class="section-label">
+              COURT MAP
+            </span>
+
+            <h3>
+              Shooting Zones
+            </h3>
+
+          </div>
+
+
+          <div class="legend">
+
+            <span class="legend-item">
+              <i class="legend-dot positive"></i>
+              Positive
+            </span>
+
+            <span class="legend-item">
+              <i class="legend-dot neutral"></i>
+              Neutral
+            </span>
+
+            <span class="legend-item">
+              <i class="legend-dot negative"></i>
+              Weakness
+            </span>
+
+            <span class="legend-item">
+              <i class="legend-dot limited"></i>
+              Limited
+            </span>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- COURT -->
+
+        <div class="court-wrapper">
+
+          <svg
+            class="court"
+            viewBox="0 0 750 600"
+            preserveAspectRatio="xMidYMid meet"
+          >
+
+
+            <!-- BACKGROUND -->
+
+            <rect
+              class="court-background"
+              x="15"
+              y="15"
+              width="720"
+              height="570"
+              rx="8"
+            />
+
+
+            <!-- OUTER COURT -->
+
+            <rect
+              class="court-line"
+              x="15"
+              y="15"
+              width="720"
+              height="570"
+            />
+
+
+            <!-- PAINT -->
+
+            <rect
+              class="court-line"
+              x="255"
+              y="15"
+              width="240"
+              height="220"
+            />
+
+
+            <!-- FREE THROW CIRCLE -->
+
+            <circle
+              class="court-line"
+              cx="375"
+              cy="235"
+              r="72"
+            />
+
+
+            <!-- BACKBOARD -->
+
+            <line
+              class="court-line strong"
+              x1="330"
+              y1="69"
+              x2="420"
+              y2="69"
+            />
+
+
+            <!-- HOOP -->
+
+            <circle
+              class="court-line strong"
+              cx="375"
+              cy="92"
+              r="12"
+            />
+
+
+            <!-- RESTRICTED AREA -->
+
+            <path
+              class="court-line"
+              d="
+                M 320 92
+                A 55 55 0 0 0 430 92
+              "
+            />
+
+
+            <!-- LEFT CORNER THREE -->
+
+            <line
+              class="court-line"
+              x1="68"
+              y1="15"
+              x2="68"
+              y2="158"
+            />
+
+
+            <!-- RIGHT CORNER THREE -->
+
+            <line
+              class="court-line"
+              x1="682"
+              y1="15"
+              x2="682"
+              y2="158"
+            />
+
+
+            <!-- THREE POINT ARC -->
+
+            <path
+              class="court-line"
+              d="
+                M 68 158
+                A 333 333 0 0 0 682 158
+              "
+            />
+
+
+
+            <!-- ===========================================
+                 ZONES
+            ============================================ -->
+
+            @for (
+              item of courtZones();
+              track item.data.shot_zone
+            ) {
+
+              <g
+                class="zone-node"
+                [class]="profileClass(item.data)"
+                [class.selected]="isSelected(item.data)"
+                (click)="selectZone(item.data)"
+                [attr.transform]="
+                  'translate(' +
+                  item.position.x +
+                  ' ' +
+                  item.position.y +
+                  ')'
+                "
+              >
+
+                <circle
+                  class="zone-node-bg"
+                  r="47"
+                />
+
+
+                <text
+                  class="zone-name"
+                  text-anchor="middle"
+                  y="-16"
+                >
+                  {{
+                    formatZoneName(
+                      item.data.shot_zone
+                    )
+                  }}
+                </text>
+
+
+                <text
+                  class="zone-fg"
+                  text-anchor="middle"
+                  y="8"
+                >
+                  {{
+                    formatPercent(
+                      item.data.shooting.fg_pct
+                    )
+                  }}
+                </text>
+
+
+                <text
+                  class="zone-fga"
+                  text-anchor="middle"
+                  y="27"
+                >
+                  {{ item.data.shooting.fga }} FGA
+                </text>
+
+              </g>
+
+            }
+
+          </svg>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- =================================================
+           COACH INSIGHTS
+      ================================================== -->
+
+      @if (coachInsights().length > 0) {
+
+        <section class="coach-insights-panel">
+
+          <div class="coach-insights-header">
+
+            <div>
+
+              <span class="section-label">
+                COACH INSIGHTS
+              </span>
+
+              <h3>
+                Offensive Takeaways
+              </h3>
+
+            </div>
+
+
+            <span class="insight-count">
+              {{ coachInsights().length }}
+              insights
+            </span>
+
+          </div>
+
+
+
+          <div class="coach-insights-grid">
+
+            @for (
+              insight of coachInsights();
+              track insight.title
+            ) {
+
+              <article
+                class="coach-insight-card"
+                [class.positive]="
+                  insight.type === 'positive'
+                "
+                [class.warning]="
+                  insight.type === 'warning'
+                "
+                [class.neutral]="
+                  insight.type === 'neutral'
+                "
+                [class.limited]="
+                  insight.type === 'limited'
+                "
+              >
+
+
+                <!-- ICON -->
+
+                <div class="insight-icon">
+
+                  @if (
+                    insight.type === 'positive'
+                  ) {
+                    +
+                  }
+
+                  @if (
+                    insight.type === 'warning'
+                  ) {
+                    !
+                  }
+
+                  @if (
+                    insight.type === 'neutral'
+                  ) {
+                    ~
+                  }
+
+                  @if (
+                    insight.type === 'limited'
+                  ) {
+                    ?
+                  }
+
+                </div>
+
+
+
+                <!-- CONTENT -->
+
+                <div>
+
+                  <strong>
+                    {{ insight.title }}
+                  </strong>
+
+                  <p>
+                    {{ insight.text }}
+                  </p>
+
+                </div>
+
+              </article>
+
+            }
+
+          </div>
+
+        </section>
+
+      }
+
+    </div>
+
+
+
+    <!-- ===================================================
+         RIGHT SIDEBAR
+    ==================================================== -->
+
+    <aside class="insight-panel">
+
+
+      <!-- =================================================
+           SELECTED ZONE
+      ================================================== -->
+
+      @if (selectedZone(); as zone) {
+
+        <div class="selected-zone">
+
+
+          <!-- HEADER -->
+
+          <div class="selected-zone-header">
+
+            <div>
+
+              <span class="section-label">
+                SELECTED ZONE
+              </span>
+
+              <h3>
+                {{ formatZoneName(zone.shot_zone) }}
+              </h3>
+
+            </div>
+
+
+            <span
+              class="profile-badge"
+              [class]="profileClass(zone)"
+            >
+              {{
+                profileLabel(
+                  zone.profile.zone_profile
+                )
+              }}
+            </span>
+
+          </div>
+
+
+
+          <!-- FG COMPARISON -->
+
+          <div class="shooting-comparison">
+
+
+            <div class="shooting-value primary">
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.shooting.fg_pct
+                  )
+                }}
+              </strong>
+
+              <span>
+                FG%
+              </span>
+
+            </div>
+
+
+
+            <div class="shooting-value">
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.shooting.league_fg_pct
+                  )
+                }}
+              </strong>
+
+              <span>
+                LEAGUE FG%
+              </span>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- DIFFERENCE -->
+
+          <div class="league-difference">
+
+            <span>
+              vs League
+            </span>
+
+            <strong
+              [class.positive-text]="
+                (zone.shooting.fg_pct_diff ?? 0) > 0
+              "
+              [class.negative-text]="
+                (zone.shooting.fg_pct_diff ?? 0) < 0
+              "
+            >
+              {{
+                formatSignedPercent(
+                  zone.shooting.fg_pct_diff
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+
+          <!-- METRICS -->
+
+          <div class="selected-metrics">
+
+
+            <div class="selected-metric">
+
+              <strong>
+                {{ zone.shooting.fgm }}
+                /
+                {{ zone.shooting.fga }}
+              </strong>
+
+              <span>
+                FGM / FGA
+              </span>
+
+            </div>
+
+
+
+            <div class="selected-metric">
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.usage.shot_frequency_pct
+                  )
+                }}
+              </strong>
+
+              <span>
+                SHOT FREQUENCY
+              </span>
+
+            </div>
+
+
+
+            <div class="selected-metric">
+
+              <strong>
+
+                @if (
+                  zone.shooting.performance_percentile !== null
+                ) {
+
+                  P{{
+                    formatNumber(
+                      zone.shooting.performance_percentile,
+                      0
+                    )
+                  }}
+
+                } @else {
+
+                  -
+
+                }
+
+              </strong>
+
+              <span>
+                PERFORMANCE
+              </span>
+
+            </div>
+
+
+
+            <div class="selected-metric">
+
+              <strong>
+                {{ zone.usage.volume_level }}
+              </strong>
+
+              <span>
+                VOLUME
+              </span>
+
+            </div>
+
+
+
+            <div class="selected-metric">
+
+              <strong>
+                {{
+                  formatNumber(
+                    zone.scoring.points_per_shot,
+                    2
+                  )
+                }}
+              </strong>
+
+              <span>
+                POINTS / SHOT
+              </span>
+
+            </div>
+
+
+
+            <div class="selected-metric">
+
+              <strong>
+                {{ zone.reliability.sample_level }}
+              </strong>
+
+              <span>
+                SAMPLE
+              </span>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- SKILL ESTIMATE -->
+
+          <div class="skill-card">
+
+            <div class="skill-title">
+
+              <span>
+                SKILL ESTIMATE
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.bayesian.eb_skill_fg_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="evidence-track">
+
+              <div
+                class="evidence-fill"
+                [style.width.%]="
+                  zone.bayesian.evidence_weight_pct ?? 0
+                "
+              ></div>
+
+            </div>
+
+
+            <div class="evidence-footer">
+
+              <span>
+                Evidence
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.bayesian.evidence_weight_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      }
+
+
+
+      <!-- =================================================
+           SHOT DIET
+      ================================================== -->
+
+      <div class="insight-section">
+
+        <span class="section-label">
+          SUMMARY
+        </span>
+
+        <h3>
+          Shot Diet
+        </h3>
+
+      </div>
+
+
+
+      <div class="diet-list">
+
+        @for (
+          zone of data().zones;
+          track zone.shot_zone
+        ) {
+
+          <div class="diet-row">
+
+
+            <div class="diet-name">
+
+              <span
+                class="profile-marker"
+                [class]="profileClass(zone)"
+              ></span>
+
+              {{
+                formatZoneName(
+                  zone.shot_zone
+                )
+              }}
+
+            </div>
+
+
+
+            <div class="diet-bar">
+
+              <div
+                class="diet-fill"
+                [style.width.%]="
+                  zone.usage.shot_frequency_pct
+                "
+              ></div>
+
+            </div>
+
+
+
+            <strong>
+              {{
+                formatPercent(
+                  zone.usage.shot_frequency_pct
+                )
+              }}
+            </strong>
+
+          </div>
+
+        }
+
+      </div>
+
+
+
+      <!-- =================================================
+           STRENGTHS
+      ================================================== -->
+
+      @if (
+        data().summary.strengths.length > 0
+      ) {
+
+        <div class="coach-block positive-block">
+
+          <span>
+            STRENGTHS
+          </span>
+
+          @for (
+            zone of data().summary.strengths;
+            track zone
+          ) {
+
+            <strong>
+              {{ formatZoneName(zone) }}
+            </strong>
+
+          }
+
+        </div>
+
+      }
+
+
+
+      <!-- =================================================
+           WEAKNESSES
+      ================================================== -->
+
+      @if (
+        data().summary.weaknesses.length > 0
+      ) {
+
+        <div class="coach-block negative-block">
+
+          <span>
+            WATCH
+          </span>
+
+          @for (
+            zone of data().summary.weaknesses;
+            track zone
+          ) {
+
+            <strong>
+              {{ formatZoneName(zone) }}
+            </strong>
+
+          }
+
+        </div>
+
+      }
+
+
+
+      <!-- =================================================
+           LIMITED SAMPLE
+      ================================================== -->
+
+      @if (
+        data().summary.limited_sample.length > 0
+      ) {
+
+        <div class="coach-block limited-block">
+
+          <span>
+            LIMITED SAMPLE
+          </span>
+
+          @for (
+            zone of data().summary.limited_sample;
+            track zone
+          ) {
+
+            <strong>
+              {{ formatZoneName(zone) }}
+            </strong>
+
+          }
+
+        </div>
+
+      }
+
+    </aside>
+
+  </div>
+
+
+
+  <!-- =====================================================
+       ZONE BREAKDOWN
+  ====================================================== -->
+
+  <div class="zone-detail-panel">
+
+    <div class="zone-detail-header">
+
+      <div>
+
+        <span class="section-label">
+          ZONE BREAKDOWN
+        </span>
+
+        <h3>
+          Detailed Performance
+        </h3>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="zone-table-wrapper">
+
+      <table class="zone-table">
+
+
+        <!-- HEADER -->
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Zone
+            </th>
+
+            <th>
+              FGM / FGA
+            </th>
+
+            <th>
+              FG%
+            </th>
+
+            <th>
+              League
+            </th>
+
+            <th>
+              Diff
+            </th>
+
+            <th>
+              Frequency
+            </th>
+
+            <th>
+              Perf.
+            </th>
+
+            <th>
+              Volume
+            </th>
+
+            <th>
+              Sample
+            </th>
+
+            <th>
+              Profile
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+
+        <!-- BODY -->
+
+        <tbody>
+
+          @for (
+            zone of data().zones;
+            track zone.shot_zone
+          ) {
+
+            <tr>
+
+
+              <!-- ZONE -->
+
+              <td>
+
+                <div class="table-zone-name">
+
+                  <span
+                    class="profile-marker"
+                    [class]="profileClass(zone)"
+                  ></span>
+
+                  <strong>
+                    {{
+                      formatZoneName(
+                        zone.shot_zone
+                      )
+                    }}
+                  </strong>
+
+                </div>
+
+              </td>
+
+
+
+              <!-- FGM / FGA -->
+
+              <td>
+                {{ zone.shooting.fgm }}
+                /
+                {{ zone.shooting.fga }}
+              </td>
+
+
+
+              <!-- FG -->
+
+              <td class="strong-value">
+
+                {{
+                  formatPercent(
+                    zone.shooting.fg_pct
+                  )
+                }}
+
+              </td>
+
+
+
+              <!-- LEAGUE FG -->
+
+              <td>
+
+                {{
+                  formatPercent(
+                    zone.shooting.league_fg_pct
+                  )
+                }}
+
+              </td>
+
+
+
+              <!-- DIFFERENCE -->
+
+              <td
+                [class.positive-text]="
+                  (zone.shooting.fg_pct_diff ?? 0) > 0
+                "
+                [class.negative-text]="
+                  (zone.shooting.fg_pct_diff ?? 0) < 0
+                "
+              >
+
+                {{
+                  formatSignedPercent(
+                    zone.shooting.fg_pct_diff
+                  )
+                }}
+
+              </td>
+
+
+
+              <!-- FREQUENCY -->
+
+              <td>
+
+                {{
+                  formatPercent(
+                    zone.usage.shot_frequency_pct
+                  )
+                }}
+
+              </td>
+
+
+
+              <!-- PERFORMANCE -->
+
+              <td>
+
+                @if (
+                  zone.shooting.performance_percentile !== null
+                ) {
+
+                  P{{
+                    formatNumber(
+                      zone.shooting.performance_percentile,
+                      0
+                    )
+                  }}
+
+                } @else {
+
+                  -
+
+                }
+
+              </td>
+
+
+
+              <!-- VOLUME -->
+
+              <td>
+                {{ zone.usage.volume_level }}
+              </td>
+
+
+
+              <!-- SAMPLE -->
+
+              <td>
+                {{ zone.reliability.sample_level }}
+              </td>
+
+
+
+              <!-- PROFILE -->
+
+              <td>
+
+                <span
+                  class="profile-badge"
+                  [class]="profileClass(zone)"
+                >
+                  {{
+                    profileLabel(
+                      zone.profile.zone_profile
+                    )
+                  }}
+                </span>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>

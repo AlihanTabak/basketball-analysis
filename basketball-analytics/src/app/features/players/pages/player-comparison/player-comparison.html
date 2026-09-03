@@ -1,0 +1,863 @@
+<div class="comparison-page">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <header class="comparison-header">
+
+    <div>
+      <p class="eyebrow">
+        PLAYER COMPARISON
+      </p>
+
+      <h1>
+        Head to Head
+      </h1>
+    </div>
+
+    <div class="season-badge">
+  {{ seasonName(selectedSeason()) }}
+</div>
+
+  </header>
+
+
+  <!-- =====================================================
+       PLAYER SELECTOR
+  ====================================================== -->
+
+  <section class="comparison-selector">
+
+    <!-- PLAYER A -->
+    <div class="selector-field">
+
+      <label>
+        Player A
+      </label>
+
+      <select
+        [value]="selectedPlayer1() ?? ''"
+        (change)="onPlayer1Change($event)"
+      >
+
+        <option value="">
+          Select player
+        </option>
+
+        @for (
+          player of players();
+          track player.player_id + '-' + player.team_id
+        ) {
+
+          <option
+            [value]="player.player_id"
+          >
+            {{ player.player_name }}
+            — {{ player.team_name }}
+          </option>
+
+        }
+
+      </select>
+
+    </div>
+
+
+    <!-- PLAYER B -->
+    <div class="selector-field">
+
+      <label>
+        Player B
+      </label>
+
+      <select
+        [value]="selectedPlayer2() ?? ''"
+        (change)="onPlayer2Change($event)"
+      >
+
+        <option value="">
+          Select player
+        </option>
+
+        @for (
+          player of players();
+          track player.player_id + '-' + player.team_id
+        ) {
+
+          <option
+            [value]="player.player_id"
+          >
+            {{ player.player_name }}
+            — {{ player.team_name }}
+          </option>
+
+        }
+
+      </select>
+
+    </div>
+
+
+    <!-- COMPARE BUTTON -->
+    <button
+      class="compare-button"
+      [disabled]="
+        !selectedPlayer1()
+        ||
+        !selectedPlayer2()
+        ||
+        selectedPlayer1() === selectedPlayer2()
+      "
+      (click)="compareSelected()"
+    >
+      Compare
+    </button>
+
+  </section>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  @if (error()) {
+
+    <div class="state error compact">
+      {{ error() }}
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  @if (loading()) {
+
+    <div class="state">
+      Karşılaştırma yükleniyor...
+    </div>
+
+  }
+
+
+  <!-- =====================================================
+       COMPARISON RESULT
+  ====================================================== -->
+
+  @if (!loading() && data(); as d) {
+
+    <!-- PLAYER HEADERS -->
+    <section class="players">
+
+      <article class="player-card">
+
+        <span class="player-side">
+          PLAYER A
+        </span>
+
+        <h2>
+          {{ d.player1.player_name }}
+        </h2>
+
+        <p>
+          {{ d.player1.team_name }}
+        </p>
+
+      </article>
+
+
+      <div class="vs">
+        VS
+      </div>
+
+
+      <article class="player-card right">
+
+        <span class="player-side">
+          PLAYER B
+        </span>
+
+        <h2>
+          {{ d.player2.player_name }}
+        </h2>
+
+        <p>
+          {{ d.player2.team_name }}
+        </p>
+
+      </article>
+
+    </section>
+
+
+    <!-- ===================================================
+         BASIC STATS
+    ==================================================== -->
+
+    <section class="basic-stats">
+
+      <!-- PPG -->
+      <div class="comparison-row">
+
+        <strong>
+          {{ formatValue(d.player1.stats.ppg) }}
+        </strong>
+
+        <span>
+          PPG
+        </span>
+
+        <strong>
+          {{ formatValue(d.player2.stats.ppg) }}
+        </strong>
+
+      </div>
+
+
+      <!-- RPG -->
+      <div class="comparison-row">
+
+        <strong>
+          {{ formatValue(d.player1.stats.rpg) }}
+        </strong>
+
+        <span>
+          RPG
+        </span>
+
+        <strong>
+          {{ formatValue(d.player2.stats.rpg) }}
+        </strong>
+
+      </div>
+
+
+      <!-- APG -->
+      <div class="comparison-row">
+
+        <strong>
+          {{ formatValue(d.player1.stats.apg) }}
+        </strong>
+
+        <span>
+          APG
+        </span>
+
+        <strong>
+          {{ formatValue(d.player2.stats.apg) }}
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         ADVANCED PROFILE
+    ==================================================== -->
+
+    <section class="comparison-panel">
+
+      <p class="panel-label">
+        ADVANCED PROFILE
+      </p>
+
+      <h2>
+        League Percentiles
+      </h2>
+
+
+      <!-- =================================================
+           TS%
+      ================================================== -->
+
+      <div class="metric-row">
+
+        <div class="metric-side left">
+
+          <div class="metric-value">
+
+            <span>
+              {{ formatPercentile(d.player1.percentiles.ts) }}
+            </span>
+
+            {{ formatPercent(d.player1.stats.ts_pct) }}
+
+          </div>
+
+          <div class="bar reverse">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player1.percentiles.ts
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <strong class="metric-name">
+          TS%
+        </strong>
+
+
+        <div class="metric-side">
+
+          <div class="metric-value">
+
+            {{ formatPercent(d.player2.stats.ts_pct) }}
+
+            <span>
+              {{ formatPercentile(d.player2.percentiles.ts) }}
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player2.percentiles.ts
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           eFG%
+      ================================================== -->
+
+      <div class="metric-row">
+
+        <div class="metric-side left">
+
+          <div class="metric-value">
+
+            <span>
+              {{ formatPercentile(d.player1.percentiles.efg) }}
+            </span>
+
+            {{ formatPercent(d.player1.stats.efg_pct) }}
+
+          </div>
+
+          <div class="bar reverse">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player1.percentiles.efg
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <strong class="metric-name">
+          eFG%
+        </strong>
+
+
+        <div class="metric-side">
+
+          <div class="metric-value">
+
+            {{ formatPercent(d.player2.stats.efg_pct) }}
+
+            <span>
+              {{ formatPercentile(d.player2.percentiles.efg) }}
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player2.percentiles.efg
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           USG%
+      ================================================== -->
+
+      <div class="metric-row">
+
+        <div class="metric-side left">
+
+          <div class="metric-value">
+
+            <span>
+              {{ formatPercentile(d.player1.percentiles.usg) }}
+            </span>
+
+            {{ formatPercent(d.player1.stats.usg_pct) }}
+
+          </div>
+
+          <div class="bar reverse">
+
+            <div
+              class="fill usage"
+              [style.width]="percentileWidth(
+                d.player1.percentiles.usg
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <strong class="metric-name">
+          USG%
+        </strong>
+
+
+        <div class="metric-side">
+
+          <div class="metric-value">
+
+            {{ formatPercent(d.player2.stats.usg_pct) }}
+
+            <span>
+              {{ formatPercentile(d.player2.percentiles.usg) }}
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill usage"
+              [style.width]="percentileWidth(
+                d.player2.percentiles.usg
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           AST%
+      ================================================== -->
+
+      <div class="metric-row">
+
+        <div class="metric-side left">
+
+          <div class="metric-value">
+
+            <span>
+              {{ formatPercentile(d.player1.percentiles.ast) }}
+            </span>
+
+            {{ formatPercent(d.player1.stats.ast_pct) }}
+
+          </div>
+
+          <div class="bar reverse">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player1.percentiles.ast
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <strong class="metric-name">
+          AST%
+        </strong>
+
+
+        <div class="metric-side">
+
+          <div class="metric-value">
+
+            {{ formatPercent(d.player2.stats.ast_pct) }}
+
+            <span>
+              {{ formatPercentile(d.player2.percentiles.ast) }}
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player2.percentiles.ast
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           AST / TOV
+      ================================================== -->
+
+      <div class="metric-row">
+
+        <div class="metric-side left">
+
+          <div class="metric-value">
+
+            <span>
+              {{ formatPercentile(d.player1.percentiles.ast_to) }}
+            </span>
+
+            {{ formatValue(
+              d.player1.stats.ast_to,
+              2
+            ) }}
+
+          </div>
+
+          <div class="bar reverse">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player1.percentiles.ast_to
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <strong class="metric-name">
+          AST / TOV
+        </strong>
+
+
+        <div class="metric-side">
+
+          <div class="metric-value">
+
+            {{ formatValue(
+              d.player2.stats.ast_to,
+              2
+            ) }}
+
+            <span>
+              {{ formatPercentile(d.player2.percentiles.ast_to) }}
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player2.percentiles.ast_to
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           TOV%
+      ================================================== -->
+
+      <div class="metric-row">
+
+        <div class="metric-side left">
+
+          <div class="metric-value">
+
+            <span>
+              {{ formatPercentile(d.player1.percentiles.tov) }}
+            </span>
+
+            {{ formatPercent(d.player1.stats.tov_pct) }}
+
+          </div>
+
+          <div class="bar reverse">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player1.percentiles.tov
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <strong class="metric-name">
+          TOV%
+        </strong>
+
+
+        <div class="metric-side">
+
+          <div class="metric-value">
+
+            {{ formatPercent(d.player2.stats.tov_pct) }}
+
+            <span>
+              {{ formatPercentile(d.player2.percentiles.tov) }}
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill"
+              [style.width]="percentileWidth(
+                d.player2.percentiles.tov
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           3P ATTEMPT RATE
+      ================================================== -->
+
+      <div class="metric-row">
+
+        <div class="metric-side left">
+
+          <div class="metric-value">
+
+            <span>
+              {{ formatPercentile(
+                d.player1.percentiles.three_par
+              ) }}
+            </span>
+
+            {{
+              formatPercent(
+                d.player1.stats.three_par,
+                true
+              )
+            }}
+
+          </div>
+
+          <div class="bar reverse">
+
+            <div
+              class="fill profile"
+              [style.width]="percentileWidth(
+                d.player1.percentiles.three_par
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <strong class="metric-name">
+          3PAr
+        </strong>
+
+
+        <div class="metric-side">
+
+          <div class="metric-value">
+
+            {{
+              formatPercent(
+                d.player2.stats.three_par,
+                true
+              )
+            }}
+
+            <span>
+              {{ formatPercentile(
+                d.player2.percentiles.three_par
+              ) }}
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill profile"
+              [style.width]="percentileWidth(
+                d.player2.percentiles.three_par
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           FT RATE
+      ================================================== -->
+
+      <div class="metric-row">
+
+        <div class="metric-side left">
+
+          <div class="metric-value">
+
+            <span>
+              {{ formatPercentile(
+                d.player1.percentiles.ft_rate
+              ) }}
+            </span>
+
+            {{
+              formatPercent(
+                d.player1.stats.ft_rate,
+                true
+              )
+            }}
+
+          </div>
+
+          <div class="bar reverse">
+
+            <div
+              class="fill profile"
+              [style.width]="percentileWidth(
+                d.player1.percentiles.ft_rate
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <strong class="metric-name">
+          FTr
+        </strong>
+
+
+        <div class="metric-side">
+
+          <div class="metric-value">
+
+            {{
+              formatPercent(
+                d.player2.stats.ft_rate,
+                true
+              )
+            }}
+
+            <span>
+              {{ formatPercentile(
+                d.player2.percentiles.ft_rate
+              ) }}
+            </span>
+
+          </div>
+
+          <div class="bar">
+
+            <div
+              class="fill profile"
+              [style.width]="percentileWidth(
+                d.player2.percentiles.ft_rate
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  }
+
+
+  <!-- =====================================================
+       EMPTY STATE
+  ====================================================== -->
+
+  @if (
+    !loading()
+    &&
+    !data()
+    &&
+    !error()
+  ) {
+
+    <section class="empty-comparison">
+
+      <p class="panel-label">
+        START COMPARISON
+      </p>
+
+      <h2>
+        İki oyuncu seç
+      </h2>
+
+      <p>
+        Aynı sezondaki iki oyuncuyu seçerek skor üretimi,
+        verimlilik, kullanım ve oyun kuruculuk profillerini
+        lig percentile'ları üzerinden karşılaştırabilirsin.
+      </p>
+
+    </section>
+
+  }
+
+</div>

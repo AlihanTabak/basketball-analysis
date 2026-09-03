@@ -1,0 +1,1432 @@
+<div class="team-page">
+
+  @if (loading()) {
+
+    <div class="state">
+      Takım yükleniyor...
+    </div>
+
+  } @else if (error()) {
+
+    <div class="state error">
+      {{ error() }}
+    </div>
+
+  } @else if (team(); as t) {
+
+
+    <!-- =====================================================
+         TEAM HEADER
+         ===================================================== -->
+
+    <section class="team-header">
+
+      <div class="team-identity">
+
+        @if (t.logo_url) {
+
+          <img
+            class="team-logo"
+            [src]="t.logo_url"
+            [alt]="t.team_name"
+            (error)="onLogoError($event)"
+          />
+
+        }
+
+
+        <div>
+
+          <p class="eyebrow">
+            TEAM ANALYSIS
+          </p>
+
+          <h1>
+            {{ t.team_name }}
+          </h1>
+
+          <p class="meta">
+
+            {{ t.city }}
+
+            ·
+
+            {{ t.season }}
+
+            ·
+
+            {{ t.record.games }} Games
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="record-badge">
+
+        <strong>
+          {{ t.record.wins }} - {{ t.record.losses }}
+        </strong>
+
+        <span>
+          {{
+            winPct(
+              t.record.wins,
+              t.record.games
+            )
+          }}
+        </span>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         KPI
+         ===================================================== -->
+
+    <section class="kpi-grid">
+
+
+      <div class="kpi">
+
+        <span>
+          PPG
+        </span>
+
+        <strong>
+          {{
+            formatValue(
+              t.stats.ppg
+            )
+          }}
+        </strong>
+
+        <small>
+          {{
+            formatRank(
+              t.percentiles.ppg_rank,
+              t.percentiles.team_count
+            )
+          }}
+        </small>
+
+      </div>
+
+
+
+      <div class="kpi">
+
+        <span>
+          REB
+        </span>
+
+        <strong>
+          {{
+            formatValue(
+              t.stats.rebounds_pg
+            )
+          }}
+        </strong>
+
+        <small>
+          {{
+            formatRank(
+              t.percentiles.rebounds_rank,
+              t.percentiles.team_count
+            )
+          }}
+        </small>
+
+      </div>
+
+
+
+      <div class="kpi">
+
+        <span>
+          AST
+        </span>
+
+        <strong>
+          {{
+            formatValue(
+              t.stats.assists_pg
+            )
+          }}
+        </strong>
+
+        <small>
+          {{
+            formatRank(
+              t.percentiles.assists_rank,
+              t.percentiles.team_count
+            )
+          }}
+        </small>
+
+      </div>
+
+
+
+      <div class="kpi">
+
+        <span>
+          3P%
+        </span>
+
+        <strong>
+          {{
+            formatPercent(
+              t.stats.three_pct
+            )
+          }}
+        </strong>
+
+        <small>
+          {{
+            formatRank(
+              t.percentiles.three_pct_rank,
+              t.percentiles.team_count
+            )
+          }}
+        </small>
+
+      </div>
+
+
+
+      <div class="kpi">
+
+        <span>
+          TOV
+        </span>
+
+        <strong>
+          {{
+            formatValue(
+              t.stats.turnovers_pg
+            )
+          }}
+        </strong>
+
+        <small>
+          {{
+            formatRank(
+              t.percentiles.turnovers_rank,
+              t.percentiles.team_count
+            )
+          }}
+        </small>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LEAGUE / TEAM CONTEXT
+         ===================================================== -->
+
+    <section class="analytics-grid">
+
+
+      <!-- ===================================================
+           SCORING & SHOOTING
+           =================================================== -->
+
+      <article class="analysis-panel">
+
+        <div class="analysis-header">
+
+          <div>
+
+            <p class="panel-label">
+              LEAGUE CONTEXT
+            </p>
+
+            <h2>
+              Scoring & Shooting
+            </h2>
+
+          </div>
+
+
+          <span class="team-count">
+            {{ t.percentiles.team_count }} teams
+          </span>
+
+        </div>
+
+
+
+        <!-- PPG -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                Points Per Game
+              </span>
+
+              <strong>
+                {{
+                  formatValue(
+                    t.stats.ppg
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.ppg
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.ppg_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatValue(
+                  t.league_averages.ppg
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.ppg,
+                t.league_averages.ppg
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.ppg,
+                  t.league_averages.ppg
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.ppg
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- 2P -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                2P%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    t.stats.two_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.two_pct
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.two_pct_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatPercent(
+                  t.league_averages.two_pct
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.two_pct,
+                t.league_averages.two_pct
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.two_pct,
+                  t.league_averages.two_pct
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.two_pct
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- 3P -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                3P%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    t.stats.three_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.three_pct
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.three_pct_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatPercent(
+                  t.league_averages.three_pct
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.three_pct,
+                t.league_averages.three_pct
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.three_pct,
+                  t.league_averages.three_pct
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.three_pct
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- FT -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                FT%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    t.stats.ft_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.ft_pct
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.ft_pct_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatPercent(
+                  t.league_averages.ft_pct
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.ft_pct,
+                t.league_averages.ft_pct
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.ft_pct,
+                  t.league_averages.ft_pct
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.ft_pct
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+
+      <!-- ===================================================
+           POSSESSION & ACTIVITY
+           =================================================== -->
+
+      <article class="analysis-panel">
+
+        <div class="analysis-header">
+
+          <div>
+
+            <p class="panel-label">
+              TEAM PROFILE
+            </p>
+
+            <h2>
+              Possession & Activity
+            </h2>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- REB -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                Rebounds
+              </span>
+
+              <strong>
+                {{
+                  formatValue(
+                    t.stats.rebounds_pg
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.rebounds
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.rebounds_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatValue(
+                  t.league_averages.rebounds
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.rebounds_pg,
+                t.league_averages.rebounds
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.rebounds_pg,
+                  t.league_averages.rebounds
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.rebounds
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- AST -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                Assists
+              </span>
+
+              <strong>
+                {{
+                  formatValue(
+                    t.stats.assists_pg
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.assists
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.assists_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatValue(
+                  t.league_averages.assists
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.assists_pg,
+                t.league_averages.assists
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.assists_pg,
+                  t.league_averages.assists
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.assists
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- STL -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                Steals
+              </span>
+
+              <strong>
+                {{
+                  formatValue(
+                    t.stats.steals_pg
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.steals
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.steals_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatValue(
+                  t.league_averages.steals
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.steals_pg,
+                t.league_averages.steals
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.steals_pg,
+                  t.league_averages.steals
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.steals
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- TOV -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                Turnovers
+              </span>
+
+              <strong>
+                {{
+                  formatValue(
+                    t.stats.turnovers_pg
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.turnovers
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.turnovers_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatValue(
+                  t.league_averages.turnovers
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.turnovers_pg,
+                t.league_averages.turnovers,
+                true
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.turnovers_pg,
+                  t.league_averages.turnovers
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.turnovers
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- BLK -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                Blocks
+              </span>
+
+              <strong>
+                {{
+                  formatValue(
+                    t.stats.blocks_pg
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.blocks
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.blocks_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatValue(
+                  t.league_averages.blocks
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.blocks_pg,
+                t.league_averages.blocks
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.blocks_pg,
+                  t.league_averages.blocks
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.blocks
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- EFFICIENCY -->
+
+        <div class="analytics-metric">
+
+          <div class="metric-top">
+
+            <div>
+
+              <span class="metric-name">
+                Efficiency
+              </span>
+
+              <strong>
+                {{
+                  formatValue(
+                    t.stats.efficiency_pg
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-rank">
+
+              <strong>
+                {{
+                  formatPercentile(
+                    t.percentiles.efficiency
+                  )
+                }}
+              </strong>
+
+              <span>
+                {{
+                  formatRank(
+                    t.percentiles.efficiency_rank,
+                    t.percentiles.team_count
+                  )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="comparison-line">
+
+            <span>
+
+              League Avg
+
+              {{
+                formatValue(
+                  t.league_averages.efficiency
+                )
+              }}
+
+            </span>
+
+
+            <strong
+              [class]="differenceClass(
+                t.stats.efficiency_pg,
+                t.league_averages.efficiency
+              )"
+            >
+
+              {{
+                difference(
+                  t.stats.efficiency_pg,
+                  t.league_averages.efficiency
+                )
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="percentile-track">
+
+            <div
+              class="percentile-fill"
+              [style.width]="percentileWidth(
+                t.percentiles.efficiency
+              )"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         TEAM SHOT ANALYSIS
+         ===================================================== -->
+
+    @if (shotAnalysis(); as shots) {
+
+      <section class="shot-analysis-section">
+
+        <app-team-shot-analysis
+          [data]="shots">
+        </app-team-shot-analysis>
+
+      </section>
+
+    }
+
+
+
+    <!-- =====================================================
+         ROSTER
+         ===================================================== -->
+
+    <section class="roster-panel">
+
+      <div class="roster-header">
+
+        <div>
+
+          <p class="panel-label">
+            ROSTER
+          </p>
+
+          <h2>
+            Player Performance
+          </h2>
+
+        </div>
+
+
+        <span>
+          {{ t.roster.length }} players
+        </span>
+
+      </div>
+
+
+
+      <div class="roster-table">
+
+        <div class="roster-row roster-head">
+
+          <span>
+            Player
+          </span>
+
+          <span>
+            GP
+          </span>
+
+          <span>
+            MPG
+          </span>
+
+          <span>
+            PPG
+          </span>
+
+          <span>
+            RPG
+          </span>
+
+          <span>
+            APG
+          </span>
+
+          <span>
+            TS%
+          </span>
+
+          <span>
+            USG%
+          </span>
+
+        </div>
+
+
+
+        @for (
+          player of t.roster;
+          track player.player_id
+        ) {
+
+          <button
+            class="roster-row player-row"
+            type="button"
+            (click)="openPlayer(
+              player.player_id,
+              t.season_id
+            )"
+          >
+
+            <strong>
+              {{ player.player_name }}
+            </strong>
+
+            <span>
+              {{ player.games ?? '-' }}
+            </span>
+
+            <span>
+              {{
+                formatValue(
+                  player.average_minutes
+                )
+              }}
+            </span>
+
+            <span>
+              {{
+                formatValue(
+                  player.ppg
+                )
+              }}
+            </span>
+
+            <span>
+              {{
+                formatValue(
+                  player.rpg
+                )
+              }}
+            </span>
+
+            <span>
+              {{
+                formatValue(
+                  player.apg
+                )
+              }}
+            </span>
+
+            <span>
+              {{
+                formatPercent(
+                  player.ts_pct
+                )
+              }}
+            </span>
+
+            <span>
+              {{
+                formatPercent(
+                  player.usg_pct
+                )
+              }}
+            </span>
+
+          </button>
+
+        } @empty {
+
+          <div class="empty-roster">
+            Bu takım için oyuncu verisi bulunamadı.
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+</div>

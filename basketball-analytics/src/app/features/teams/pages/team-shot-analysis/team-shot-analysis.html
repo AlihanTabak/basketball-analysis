@@ -1,0 +1,2243 @@
+<section class="team-shot-analysis">
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <header class="shot-header">
+
+    <div class="shot-header-copy">
+
+      <span class="eyebrow">
+        TEAM SHOT PROFILE
+      </span>
+
+      <h2>
+        {{ data().team.team_name }}
+      </h2>
+
+      <p>
+        Zone efficiency, shot distribution and matchup tendencies.
+      </p>
+
+    </div>
+
+
+    <div class="mode-switch">
+
+      <button
+        type="button"
+        [class.active]="mode() === 'offense'"
+        (click)="setMode('offense')"
+      >
+        OFFENSE
+      </button>
+
+      <button
+        type="button"
+        [class.active]="mode() === 'defense'"
+        (click)="setMode('defense')"
+      >
+        DEFENSE
+      </button>
+
+      <button
+        type="button"
+        [class.active]="mode() === 'matchup'"
+        (click)="setMode('matchup')"
+      >
+        MATCHUP
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       MATCHUP TOOLBAR
+       ===================================================== -->
+
+  @if (mode() === 'matchup') {
+
+    <section class="matchup-toolbar">
+
+      <div class="matchup-selector">
+
+        <label for="matchup-opponent">
+          OPPONENT
+        </label>
+
+
+        @if (opponentsLoading()) {
+
+          <div class="matchup-loading-inline">
+            Loading opponents...
+          </div>
+
+        } @else {
+
+          <select
+            id="matchup-opponent"
+            [value]="selectedOpponentId() ?? ''"
+            (change)="selectOpponent(
+              +$any($event.target).value
+            )"
+          >
+
+            <option
+              value=""
+              disabled
+            >
+              Select opponent
+            </option>
+
+            @for (
+              opponent of opponents();
+              track opponent.team_id
+            ) {
+
+              <option
+                [value]="opponent.team_id"
+              >
+                {{ opponent.team_name }}
+              </option>
+
+            }
+
+          </select>
+
+        }
+
+      </div>
+
+
+      @if (matchupAnalysis(); as matchup) {
+
+        <div class="matchup-versus">
+
+          <span class="matchup-team">
+            {{ matchup.team.team_name }}
+          </span>
+
+          <strong>
+            VS
+          </strong>
+
+          <span class="matchup-opponent">
+            {{ matchup.opponent.team_name }}
+          </span>
+
+        </div>
+
+      }
+
+    </section>
+
+
+    @if (matchupError()) {
+
+      <div class="matchup-error">
+        {{ matchupError() }}
+      </div>
+
+    }
+
+  }
+
+
+  <!-- =====================================================
+       MATCHUP EMPTY STATE
+       ===================================================== -->
+
+  @if (
+    mode() === 'matchup' &&
+    selectedOpponentId() === null
+  ) {
+
+    <section class="matchup-empty-state">
+
+      <span class="empty-kicker">
+        MATCHUP ENGINE
+      </span>
+
+      <h3>
+        Select an opponent
+      </h3>
+
+      <p>
+        Compare your offensive shot profile against the
+        opponent's defensive tendencies zone by zone.
+      </p>
+
+    </section>
+
+  }
+
+
+  <!-- =====================================================
+       MATCHUP LOADING
+       ===================================================== -->
+
+  @if (
+    mode() === 'matchup' &&
+    matchupLoading()
+  ) {
+
+    <section class="matchup-empty-state">
+
+      <span class="empty-kicker">
+        MATCHUP ENGINE
+      </span>
+
+      <h3>
+        Building matchup...
+      </h3>
+
+      <p>
+        Comparing offensive efficiency and shot access
+        against the selected defense.
+      </p>
+
+    </section>
+
+  }
+
+
+  <!-- =====================================================
+       MAIN ANALYSIS AREA
+       ===================================================== -->
+
+  @if (
+    mode() !== 'matchup' ||
+    (
+      mode() === 'matchup' &&
+      matchupAnalysis() &&
+      !matchupLoading()
+    )
+  ) {
+
+    <div class="shot-layout">
+
+      <!-- =================================================
+           LEFT COLUMN
+           ================================================= -->
+
+      <div class="shot-main-column">
+
+
+        <!-- ===============================================
+             COURT
+             =============================================== -->
+
+        <section class="court-panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <span class="panel-kicker">
+                SHOT MAP
+              </span>
+
+              <h3>
+
+                @if (mode() === 'offense') {
+                  Offensive Zone Profile
+                }
+
+                @if (mode() === 'defense') {
+                  Defensive Zone Profile
+                }
+
+                @if (mode() === 'matchup') {
+                  Matchup Advantage Map
+                }
+
+              </h3>
+
+            </div>
+
+
+            <div class="court-legend">
+
+              <span>
+                <i class="legend-dot positive"></i>
+                Positive
+              </span>
+
+              <span>
+                <i class="legend-dot neutral"></i>
+                Neutral
+              </span>
+
+              <span>
+                <i class="legend-dot warning"></i>
+                Concern
+              </span>
+
+              <span>
+                <i class="legend-dot negative"></i>
+                Negative
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- =============================================
+               SVG COURT
+               ============================================= -->
+
+          <div class="court-wrap">
+
+            <svg
+              class="court"
+              viewBox="0 0 750 600"
+              role="img"
+              aria-label="Basketball half court shot profile"
+            >
+
+              <!-- COURT BACKGROUND -->
+
+              <rect
+                x="10"
+                y="10"
+                width="730"
+                height="580"
+                rx="18"
+                class="court-floor"
+              ></rect>
+
+
+              <!-- BASELINE -->
+
+              <line
+                x1="20"
+                y1="35"
+                x2="730"
+                y2="35"
+                class="court-line"
+              ></line>
+
+
+              <!-- PAINT -->
+
+              <rect
+                x="275"
+                y="35"
+                width="200"
+                height="190"
+                class="court-line-fill"
+              ></rect>
+
+
+              <!-- FREE THROW CIRCLE -->
+
+              <circle
+                cx="375"
+                cy="225"
+                r="60"
+                class="court-line"
+              ></circle>
+
+
+              <!-- BACKBOARD -->
+
+              <line
+                x1="330"
+                y1="75"
+                x2="420"
+                y2="75"
+                class="court-line strong"
+              ></line>
+
+
+              <!-- RIM -->
+
+              <circle
+                cx="375"
+                cy="95"
+                r="12"
+                class="rim"
+              ></circle>
+
+
+              <!-- RESTRICTED AREA -->
+
+              <path
+                d="
+                  M 320 95
+                  A 55 55 0 0 0 430 95
+                "
+                class="court-line"
+              ></path>
+
+
+              <!-- CORNER THREE LINES -->
+
+              <line
+                x1="75"
+                y1="35"
+                x2="75"
+                y2="275"
+                class="court-line"
+              ></line>
+
+              <line
+                x1="675"
+                y1="35"
+                x2="675"
+                y2="275"
+                class="court-line"
+              ></line>
+
+
+              <!-- THREE POINT ARC -->
+
+              <path
+                d="
+                  M 75 275
+                  A 360 360 0 0 0 675 275
+                "
+                class="court-line"
+              ></path>
+
+
+              <!-- CENTER COURT ARC -->
+
+              <path
+                d="
+                  M 300 590
+                  A 75 75 0 0 1 450 590
+                "
+                class="court-line subtle"
+              ></path>
+
+
+              <!-- =================================================
+                   OFFENSE ZONES
+                   ================================================= -->
+
+              @if (mode() === 'offense') {
+
+                @for (
+                  zone of offenseZones();
+                  track zone.data.shot_zone
+                ) {
+
+                  <g
+                    class="zone-marker"
+                    [class.selected]="
+                      isSelected(
+                        zone.data.shot_zone
+                      )
+                    "
+                    [class.positive]="
+                      offenseProfileClass(
+                        zone.data
+                      ) === 'positive'
+                    "
+                    [class.warning]="
+                      offenseProfileClass(
+                        zone.data
+                      ) === 'warning'
+                    "
+                    [class.negative]="
+                      offenseProfileClass(
+                        zone.data
+                      ) === 'negative'
+                    "
+                    [class.neutral]="
+                      offenseProfileClass(
+                        zone.data
+                      ) === 'neutral'
+                    "
+                    (click)="
+                      selectZone(
+                        zone.data.shot_zone
+                      )
+                    "
+                  >
+
+                    <circle
+                      [attr.cx]="zone.position.x"
+                      [attr.cy]="zone.position.y"
+                      r="38"
+                      class="zone-circle"
+                    ></circle>
+
+
+                    <text
+                      [attr.x]="zone.position.x"
+                      [attr.y]="zone.position.y - 4"
+                      text-anchor="middle"
+                      class="zone-value"
+                    >
+                      {{
+                        formatPercent(
+                          zone.data.shooting.fg_pct
+                        )
+                      }}
+                    </text>
+
+
+                    <text
+                        [attr.x]="zone.position.x"
+                        [attr.y]="zone.position.y + 14"
+                        text-anchor="middle"
+                        class="zone-meta"
+                        >
+                        {{
+                            courtZoneLabel(
+                            zone.data.shot_zone
+                            )
+                        }}
+                        </text>
+
+                  </g>
+
+                }
+
+              }
+
+
+              <!-- =================================================
+                   DEFENSE ZONES
+                   ================================================= -->
+
+              @if (mode() === 'defense') {
+
+                @for (
+                  zone of defenseZones();
+                  track zone.data.shot_zone
+                ) {
+
+                  <g
+                    class="zone-marker"
+                    [class.selected]="
+                      isSelected(
+                        zone.data.shot_zone
+                      )
+                    "
+                    [class.positive]="
+                      defenseProfileClass(
+                        zone.data
+                      ) === 'positive'
+                    "
+                    [class.warning]="
+                      defenseProfileClass(
+                        zone.data
+                      ) === 'warning'
+                    "
+                    [class.negative]="
+                      defenseProfileClass(
+                        zone.data
+                      ) === 'negative'
+                    "
+                    [class.neutral]="
+                      defenseProfileClass(
+                        zone.data
+                      ) === 'neutral'
+                    "
+                    (click)="
+                      selectZone(
+                        zone.data.shot_zone
+                      )
+                    "
+                  >
+
+                    <circle
+                      [attr.cx]="zone.position.x"
+                      [attr.cy]="zone.position.y"
+                      r="38"
+                      class="zone-circle"
+                    ></circle>
+
+
+                    <text
+                      [attr.x]="zone.position.x"
+                      [attr.y]="zone.position.y - 4"
+                      text-anchor="middle"
+                      class="zone-value"
+                    >
+                      {{
+                        formatPercent(
+                          zone.data.shot_defense
+                            .opp_fg_pct
+                        )
+                      }}
+                    </text>
+
+
+                    <text
+                    [attr.x]="zone.position.x"
+                    [attr.y]="zone.position.y + 14"
+                    text-anchor="middle"
+                    class="zone-meta"
+                    >
+                    {{
+                        courtZoneLabel(
+                        zone.data.shot_zone
+                        )
+                    }}
+                    </text>
+
+                  </g>
+
+                }
+
+              }
+
+
+              <!-- =================================================
+                   MATCHUP ZONES
+                   ================================================= -->
+
+              @if (mode() === 'matchup') {
+
+                @for (
+                  zone of matchupZones();
+                  track zone.data.shot_zone
+                ) {
+
+                  <g
+                    class="zone-marker matchup-zone"
+                    [class.selected]="
+                      isSelected(
+                        zone.data.shot_zone
+                      )
+                    "
+                    [class.positive]="
+                      matchupProfileClass(
+                        zone.data
+                      ) === 'positive'
+                    "
+                    [class.warning]="
+                      matchupProfileClass(
+                        zone.data
+                      ) === 'warning'
+                    "
+                    [class.negative]="
+                      matchupProfileClass(
+                        zone.data
+                      ) === 'negative'
+                    "
+                    [class.neutral]="
+                      matchupProfileClass(
+                        zone.data
+                      ) === 'neutral'
+                    "
+                    (click)="
+                      selectZone(
+                        zone.data.shot_zone
+                      )
+                    "
+                  >
+
+                    <circle
+                      [attr.cx]="zone.position.x"
+                      [attr.cy]="zone.position.y"
+                      r="43"
+                      class="zone-circle"
+                    ></circle>
+
+
+                    <text
+                      [attr.x]="zone.position.x"
+                      [attr.y]="zone.position.y - 7"
+                      text-anchor="middle"
+                      class="zone-value"
+                    >
+                      {{
+                        formatSignedPoint(
+                          zone.data.matchup
+                            .efficiency_edge
+                        )
+                      }}
+                    </text>
+
+
+                    <text
+                      [attr.x]="zone.position.x"
+                      [attr.y]="zone.position.y + 13"
+                      text-anchor="middle"
+                      class="zone-meta"
+                    >
+                      EFF EDGE
+                    </text>
+
+                  </g>
+
+                }
+
+              }
+
+            </svg>
+
+          </div>
+
+
+          <!-- =============================================
+               COURT EXPLANATION
+               ============================================= -->
+
+          <div class="court-footnote">
+
+            @if (mode() === 'offense') {
+
+              <span>
+                Circle value = team FG%
+              </span>
+
+              <span>
+                P = league performance percentile
+              </span>
+
+            }
+
+
+            @if (mode() === 'defense') {
+
+              <span>
+                Circle value = opponent FG%
+              </span>
+
+              <span>
+                Higher percentile = better defense
+              </span>
+
+            }
+
+
+            @if (mode() === 'matchup') {
+
+              <span>
+                Circle value = efficiency matchup edge
+              </span>
+
+              <span>
+                Positive edge favors offense
+              </span>
+
+            }
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             COACH INSIGHTS
+             =============================================== -->
+
+        <section class="coach-insights-panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <span class="panel-kicker">
+                COACH INSIGHTS
+              </span>
+
+              <h3>
+
+                @if (mode() === 'offense') {
+                  Offensive Tendencies
+                }
+
+                @if (mode() === 'defense') {
+                  Defensive Tendencies
+                }
+
+                @if (mode() === 'matchup') {
+                  Matchup Game Plan
+                }
+
+              </h3>
+
+            </div>
+
+          </div>
+
+
+          <div class="insight-list">
+
+            @if (mode() === 'offense') {
+
+              @for (
+                insight of offenseInsights();
+                track insight.title
+              ) {
+
+                <article
+                  class="coach-insight"
+                  [class.positive]="
+                    insight.type === 'positive'
+                  "
+                  [class.warning]="
+                    insight.type === 'warning'
+                  "
+                  [class.neutral]="
+                    insight.type === 'neutral'
+                  "
+                >
+
+                  <div class="insight-indicator"></div>
+
+                  <div>
+
+                    <h4>
+                      {{ insight.title }}
+                    </h4>
+
+                    <p>
+                      {{ insight.text }}
+                    </p>
+
+                  </div>
+
+                </article>
+
+              }
+
+            }
+
+
+            @if (mode() === 'defense') {
+
+              @for (
+                insight of defenseInsights();
+                track insight.title
+              ) {
+
+                <article
+                  class="coach-insight"
+                  [class.positive]="
+                    insight.type === 'positive'
+                  "
+                  [class.warning]="
+                    insight.type === 'warning'
+                  "
+                  [class.neutral]="
+                    insight.type === 'neutral'
+                  "
+                >
+
+                  <div class="insight-indicator"></div>
+
+                  <div>
+
+                    <h4>
+                      {{ insight.title }}
+                    </h4>
+
+                    <p>
+                      {{ insight.text }}
+                    </p>
+
+                  </div>
+
+                </article>
+
+              }
+
+            }
+
+
+            @if (mode() === 'matchup') {
+
+              @for (
+                insight of matchupInsights();
+                track insight.title
+              ) {
+
+                <article
+                  class="coach-insight"
+                  [class.positive]="
+                    insight.type === 'positive'
+                  "
+                  [class.warning]="
+                    insight.type === 'warning'
+                  "
+                  [class.neutral]="
+                    insight.type === 'neutral'
+                  "
+                >
+
+                  <div class="insight-indicator"></div>
+
+                  <div>
+
+                    <h4>
+                      {{ insight.title }}
+                    </h4>
+
+                    <p>
+                      {{ insight.text }}
+                    </p>
+
+                  </div>
+
+                </article>
+
+              }
+
+            }
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- =================================================
+           RIGHT SIDEBAR — OFFENSE
+           ================================================= -->
+
+      @if (
+        mode() === 'offense' &&
+        selectedOffenseZone();
+        as zone
+      ) {
+
+        <aside class="insight-panel">
+
+          <span class="panel-kicker">
+            SELECTED ZONE
+          </span>
+
+          <h3>
+            {{ formatZoneName(zone.shot_zone) }}
+          </h3>
+
+
+          <div
+            class="profile-pill"
+            [class.positive]="
+              offenseProfileClass(zone) === 'positive'
+            "
+            [class.warning]="
+              offenseProfileClass(zone) === 'warning'
+            "
+            [class.negative]="
+              offenseProfileClass(zone) === 'negative'
+            "
+            [class.neutral]="
+              offenseProfileClass(zone) === 'neutral'
+            "
+          >
+            {{
+              profileLabel(
+                zone.profile.zone_profile
+              )
+            }}
+          </div>
+
+
+          <div class="metric-stack">
+
+            <div class="metric-row">
+
+              <span>
+                FG%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.shooting.fg_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                League FG%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.shooting
+                      .league_fg_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row emphasis">
+
+              <span>
+                FG% Difference
+              </span>
+
+              <strong>
+                {{
+                  formatSignedPoint(
+                    zone.shooting
+                      .fg_pct_diff
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Performance
+              </span>
+
+              <strong>
+                {{
+                  formatPercentile(
+                    zone.shooting
+                      .performance_percentile
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-divider"></div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Shot Frequency
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.usage
+                      .shot_frequency_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                League Frequency
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.usage
+                      .league_shot_frequency_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Frequency Percentile
+              </span>
+
+              <strong>
+                {{
+                  formatPercentile(
+                    zone.usage
+                      .frequency_percentile
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-divider"></div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Attempts
+              </span>
+
+              <strong>
+                {{ zone.shooting.fga }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Points / Shot
+              </span>
+
+              <strong>
+                {{
+                  formatNumber(
+                    zone.scoring
+                      .points_per_shot,
+                    3
+                  )
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </aside>
+
+      }
+
+
+      <!-- =================================================
+           RIGHT SIDEBAR — DEFENSE
+           ================================================= -->
+
+      @if (
+        mode() === 'defense' &&
+        selectedDefenseZone();
+        as zone
+      ) {
+
+        <aside class="insight-panel">
+
+          <span class="panel-kicker">
+            SELECTED ZONE
+          </span>
+
+          <h3>
+            {{ formatZoneName(zone.shot_zone) }}
+          </h3>
+
+
+          <div
+            class="profile-pill"
+            [class.positive]="
+              defenseProfileClass(zone) === 'positive'
+            "
+            [class.warning]="
+              defenseProfileClass(zone) === 'warning'
+            "
+            [class.negative]="
+              defenseProfileClass(zone) === 'negative'
+            "
+            [class.neutral]="
+              defenseProfileClass(zone) === 'neutral'
+            "
+          >
+            {{
+              profileLabel(
+                zone.profile.zone_profile
+              )
+            }}
+          </div>
+
+
+          <div class="metric-stack">
+
+            <div class="metric-row">
+
+              <span>
+                Opponent FG%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.shot_defense
+                      .opp_fg_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                League FG%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.shot_defense
+                      .league_fg_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row emphasis">
+
+              <span>
+                Opp FG% Difference
+              </span>
+
+              <strong>
+                {{
+                  formatSignedPoint(
+                    zone.shot_defense
+                      .opp_fg_pct_diff
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Shot Defense
+              </span>
+
+              <strong>
+                {{
+                  formatPercentile(
+                    zone.shot_defense
+                      .percentile
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-divider"></div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Opp Shot Frequency
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.suppression
+                      .opp_shot_frequency_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                League Frequency
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.suppression
+                      .league_shot_frequency_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Suppression
+              </span>
+
+              <strong>
+                {{
+                  formatPercentile(
+                    zone.suppression
+                      .percentile
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-divider"></div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Opp Attempts
+              </span>
+
+              <strong>
+                {{
+                  zone.shot_defense
+                    .opp_fga
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Opp Points / Shot
+              </span>
+
+              <strong>
+                {{
+                  formatNumber(
+                    zone.scoring
+                      .opp_points_per_shot,
+                    3
+                  )
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </aside>
+
+      }
+
+
+      <!-- =================================================
+           RIGHT SIDEBAR — MATCHUP
+           ================================================= -->
+
+      @if (
+        mode() === 'matchup' &&
+        selectedMatchupZone();
+        as zone
+      ) {
+
+        <aside class="insight-panel matchup-insight-panel">
+
+          <span class="panel-kicker">
+            MATCHUP ZONE
+          </span>
+
+          <h3>
+            {{ formatZoneName(zone.shot_zone) }}
+          </h3>
+
+
+          <div
+            class="profile-pill"
+            [class.positive]="
+              matchupProfileClass(zone) === 'positive'
+            "
+            [class.warning]="
+              matchupProfileClass(zone) === 'warning'
+            "
+            [class.negative]="
+              matchupProfileClass(zone) === 'negative'
+            "
+            [class.neutral]="
+              matchupProfileClass(zone) === 'neutral'
+            "
+          >
+            {{
+              profileLabel(
+                zone.matchup.profile
+              )
+            }}
+          </div>
+
+
+          <!-- MATCHUP EDGES -->
+
+          <div class="matchup-edge-grid">
+
+            <div class="edge-card">
+
+              <span>
+                EFFICIENCY EDGE
+              </span>
+
+              <strong
+                [class.edge-positive]="
+                  (zone.matchup.efficiency_edge ?? 0) > 0
+                "
+                [class.edge-negative]="
+                  (zone.matchup.efficiency_edge ?? 0) < 0
+                "
+              >
+                {{
+                  formatSignedPoint(
+                    zone.matchup
+                      .efficiency_edge
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="edge-card">
+
+              <span>
+                ACCESS EDGE
+              </span>
+
+              <strong
+                [class.edge-positive]="
+                  (zone.matchup.access_edge ?? 0) > 0
+                "
+                [class.edge-negative]="
+                  (zone.matchup.access_edge ?? 0) < 0
+                "
+              >
+                {{
+                  formatSignedPoint(
+                    zone.matchup
+                      .access_edge
+                  )
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- OUR OFFENSE -->
+
+          <div class="comparison-section">
+
+            <span class="comparison-title">
+              OUR OFFENSE
+            </span>
+
+
+            <div class="metric-row">
+
+              <span>
+                FG%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.offense.fg_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Performance
+              </span>
+
+              <strong>
+                {{
+                  formatPercentile(
+                    zone.offense
+                      .performance_percentile
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Shot Frequency
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.offense
+                      .shot_frequency_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Volume
+              </span>
+
+              <strong>
+                {{
+                  profileLabel(
+                    zone.offense
+                      .volume_level
+                  )
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- THEIR DEFENSE -->
+
+          <div class="comparison-section">
+
+            <span class="comparison-title">
+              THEIR DEFENSE
+            </span>
+
+
+            <div class="metric-row">
+
+              <span>
+                Opponent FG%
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.defense
+                      .opp_fg_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Shot Defense
+              </span>
+
+              <strong>
+                {{
+                  formatPercentile(
+                    zone.defense
+                      .shot_defense_percentile
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Opp Shot Frequency
+              </span>
+
+              <strong>
+                {{
+                  formatPercent(
+                    zone.defense
+                      .opp_shot_frequency_pct
+                  )
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="metric-row">
+
+              <span>
+                Suppression
+              </span>
+
+              <strong>
+                {{
+                  formatPercentile(
+                    zone.defense
+                      .suppression_percentile
+                  )
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="matchup-note">
+
+            @if (
+              zone.matchup.profile ===
+              'PRIMARY_ATTACK'
+            ) {
+
+              <strong>
+                Priority zone.
+              </strong>
+
+              <span>
+                Efficiency and access both favor the offense.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'ATTACK'
+            ) {
+
+              <strong>
+                Attack this matchup.
+              </strong>
+
+              <span>
+                The efficiency comparison strongly favors the offense.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'EFFICIENCY_OPPORTUNITY'
+            ) {
+
+              <strong>
+                Create access.
+              </strong>
+
+              <span>
+                Efficiency favors the offense, but the defense restricts this zone.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'VOLUME_OPPORTUNITY'
+            ) {
+
+              <strong>
+                Increase pressure here.
+              </strong>
+
+              <span>
+                The zone fits the offense and the defense may allow additional access.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'ACCESS_OPPORTUNITY'
+            ) {
+
+              <strong>
+                Available zone.
+              </strong>
+
+              <span>
+                Access is favorable, although efficiency is not a major advantage.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'TEMPTATION'
+            ) {
+
+              <strong>
+                Potential trap.
+              </strong>
+
+              <span>
+                The defense may concede this shot, but it is not an offensive strength.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'LOW_ACCESS'
+            ) {
+
+              <strong>
+                Expect resistance.
+              </strong>
+
+              <span>
+                The opponent is effective at limiting access to this zone.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'DIFFICULT'
+            ) {
+
+              <strong>
+                Difficult efficiency matchup.
+              </strong>
+
+              <span>
+                Shot quality here favors the defense.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'AVOID'
+            ) {
+
+              <strong>
+                Low-priority zone.
+              </strong>
+
+              <span>
+                Both efficiency and access favor the defense.
+              </span>
+
+            }
+
+
+            @if (
+              zone.matchup.profile ===
+              'NEUTRAL'
+            ) {
+
+              <strong>
+                Neutral matchup.
+              </strong>
+
+              <span>
+                Neither side has a decisive zone advantage.
+              </span>
+
+            }
+
+          </div>
+
+        </aside>
+
+      }
+
+    </div>
+
+
+    <!-- ===================================================
+         FULL ZONE TABLE
+         =================================================== -->
+
+    <section class="zones-panel">
+
+      <div class="panel-heading">
+
+        <div>
+
+          <span class="panel-kicker">
+            ALL ZONES
+          </span>
+
+          <h3>
+
+            @if (mode() === 'offense') {
+              Offensive Zone Breakdown
+            }
+
+            @if (mode() === 'defense') {
+              Defensive Zone Breakdown
+            }
+
+            @if (mode() === 'matchup') {
+              Matchup Zone Breakdown
+            }
+
+          </h3>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        @if (mode() === 'offense') {
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Zone</th>
+                <th>FG%</th>
+                <th>League</th>
+                <th>Diff</th>
+                <th>Perf.</th>
+                <th>Frequency</th>
+                <th>Freq. Pctl</th>
+                <th>Profile</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                zone of data().offense.zones;
+                track zone.shot_zone
+              ) {
+
+                <tr
+                  (click)="
+                    selectZone(
+                      zone.shot_zone
+                    )
+                  "
+                >
+
+                  <td class="zone-name-cell">
+                    {{
+                      formatZoneName(
+                        zone.shot_zone
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.shooting.fg_pct
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.shooting
+                          .league_fg_pct
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatSignedPoint(
+                        zone.shooting
+                          .fg_pct_diff
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercentile(
+                        zone.shooting
+                          .performance_percentile
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.usage
+                          .shot_frequency_pct
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercentile(
+                        zone.usage
+                          .frequency_percentile
+                      )
+                    }}
+                  </td>
+
+                  <td>
+
+                    <span
+                      class="table-profile"
+                      [class.positive]="
+                        offenseProfileClass(
+                          zone
+                        ) === 'positive'
+                      "
+                      [class.warning]="
+                        offenseProfileClass(
+                          zone
+                        ) === 'warning'
+                      "
+                      [class.negative]="
+                        offenseProfileClass(
+                          zone
+                        ) === 'negative'
+                      "
+                    >
+                      {{
+                        profileLabel(
+                          zone.profile
+                            .zone_profile
+                        )
+                      }}
+                    </span>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        }
+
+
+        @if (mode() === 'defense') {
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Zone</th>
+                <th>Opp FG%</th>
+                <th>League</th>
+                <th>Diff</th>
+                <th>Defense</th>
+                <th>Opp Frequency</th>
+                <th>Suppression</th>
+                <th>Profile</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                zone of data().defense.zones;
+                track zone.shot_zone
+              ) {
+
+                <tr
+                  (click)="
+                    selectZone(
+                      zone.shot_zone
+                    )
+                  "
+                >
+
+                  <td class="zone-name-cell">
+                    {{
+                      formatZoneName(
+                        zone.shot_zone
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.shot_defense
+                          .opp_fg_pct
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.shot_defense
+                          .league_fg_pct
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatSignedPoint(
+                        zone.shot_defense
+                          .opp_fg_pct_diff
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercentile(
+                        zone.shot_defense
+                          .percentile
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.suppression
+                          .opp_shot_frequency_pct
+                      )
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      formatPercentile(
+                        zone.suppression
+                          .percentile
+                      )
+                    }}
+                  </td>
+
+                  <td>
+
+                    <span
+                      class="table-profile"
+                      [class.positive]="
+                        defenseProfileClass(
+                          zone
+                        ) === 'positive'
+                      "
+                      [class.warning]="
+                        defenseProfileClass(
+                          zone
+                        ) === 'warning'
+                      "
+                      [class.negative]="
+                        defenseProfileClass(
+                          zone
+                        ) === 'negative'
+                      "
+                    >
+                      {{
+                        profileLabel(
+                          zone.profile
+                            .zone_profile
+                        )
+                      }}
+                    </span>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        }
+
+
+        @if (
+          mode() === 'matchup' &&
+          matchupAnalysis();
+          as matchup
+        ) {
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Zone</th>
+                <th>Our FG%</th>
+                <th>Their Opp FG%</th>
+                <th>Efficiency Edge</th>
+                <th>Our Frequency</th>
+                <th>Their Opp Frequency</th>
+                <th>Access Edge</th>
+                <th>Matchup</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                zone of matchup.zones;
+                track zone.shot_zone
+              ) {
+
+                <tr
+                  (click)="
+                    selectZone(
+                      zone.shot_zone
+                    )
+                  "
+                >
+
+                  <td class="zone-name-cell">
+                    {{
+                      formatZoneName(
+                        zone.shot_zone
+                      )
+                    }}
+                  </td>
+
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.offense.fg_pct
+                      )
+                    }}
+                  </td>
+
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.defense.opp_fg_pct
+                      )
+                    }}
+                  </td>
+
+
+                  <td
+                    [class.edge-positive]="
+                      (zone.matchup.efficiency_edge ?? 0) > 0
+                    "
+                    [class.edge-negative]="
+                      (zone.matchup.efficiency_edge ?? 0) < 0
+                    "
+                  >
+                    {{
+                      formatSignedPoint(
+                        zone.matchup
+                          .efficiency_edge
+                      )
+                    }}
+                  </td>
+
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.offense
+                          .shot_frequency_pct
+                      )
+                    }}
+                  </td>
+
+
+                  <td>
+                    {{
+                      formatPercent(
+                        zone.defense
+                          .opp_shot_frequency_pct
+                      )
+                    }}
+                  </td>
+
+
+                  <td
+                    [class.edge-positive]="
+                      (zone.matchup.access_edge ?? 0) > 0
+                    "
+                    [class.edge-negative]="
+                      (zone.matchup.access_edge ?? 0) < 0
+                    "
+                  >
+                    {{
+                      formatSignedPoint(
+                        zone.matchup
+                          .access_edge
+                      )
+                    }}
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="table-profile"
+                      [class.positive]="
+                        matchupProfileClass(
+                          zone
+                        ) === 'positive'
+                      "
+                      [class.warning]="
+                        matchupProfileClass(
+                          zone
+                        ) === 'warning'
+                      "
+                      [class.negative]="
+                        matchupProfileClass(
+                          zone
+                        ) === 'negative'
+                      "
+                    >
+                      {{
+                        profileLabel(
+                          zone.matchup.profile
+                        )
+                      }}
+                    </span>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+</section>
