@@ -23,7 +23,8 @@ app.include_router(team_matchup_analysis_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:4200"
+        "http://localhost:4200",
+        "https://basketball-analysis-dusky.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
