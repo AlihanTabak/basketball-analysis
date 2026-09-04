@@ -24,7 +24,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:4200",
-        "https://basketball-analysis-dusky.vercel.app",
+        "https://basketball-analysis-dusky.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],

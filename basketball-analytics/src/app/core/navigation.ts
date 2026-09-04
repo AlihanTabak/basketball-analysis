@@ -33,7 +33,7 @@ export class Navigation {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8000/api';
+    'https://basketball-analysis-hb52.onrender.com/api';
 
   getSeasons(): Observable<SeasonOption[]> {
     return this.http.get<SeasonOption[]>(
