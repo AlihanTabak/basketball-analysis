@@ -296,6 +296,20 @@ h1 {
   justify-content: flex-end;
 }
 
+.comparison-better {
+  color: #22c55e !important;
+  text-shadow: 0 0 14px rgba(34, 197, 94, 0.18);
+}
+
+.comparison-worse {
+  color: #ef4444 !important;
+  text-shadow: 0 0 14px rgba(239, 68, 68, 0.16);
+}
+
+.comparison-equal {
+  color: #94a3b8 !important;
+}
+
 .state {
   display: grid;
   place-items: center;

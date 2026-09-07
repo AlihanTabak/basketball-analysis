@@ -3,7 +3,7 @@
   @if (loading()) {
 
     <div class="state">
-      Oyuncu yükleniyor...
+      Loading player...
     </div>
 
   } @else if (error()) {
@@ -217,7 +217,7 @@
           <div class="league-reference">
 
             <span>
-              Lig Ort.
+              League Avg.
               {{ formatPercent(p.league_averages.ts) }}
             </span>
 
@@ -299,7 +299,7 @@
           <div class="league-reference">
 
             <span>
-              Lig Ort.
+              League Avg.
               {{ formatPercent(p.league_averages.efg) }}
             </span>
 
@@ -381,7 +381,7 @@
           <div class="league-reference">
 
             <span>
-              Lig Ort.
+              League Avg.
               {{ formatPercent(p.league_averages.usg) }}
             </span>
 
@@ -463,7 +463,7 @@
           <div class="league-reference">
 
             <span>
-              Lig Ort.
+              League Avg.
               {{ formatPercent(p.league_averages.tov) }}
             </span>
 
@@ -562,7 +562,7 @@
           <div class="league-reference">
 
             <span>
-              Lig Ort.
+              League Avg.
               {{ formatPercent(p.league_averages.ast) }}
             </span>
 
@@ -644,7 +644,7 @@
           <div class="league-reference">
 
             <span>
-              Lig Ort.
+              League Avg.
               {{ formatNumber(p.league_averages.ast_to) }}
             </span>
 
@@ -748,7 +748,7 @@
           <div class="league-reference">
 
             <span>
-              Lig Ort.
+              League Avg.
               {{
                 formatPercent(
                   p.league_averages.three_par,
@@ -840,7 +840,7 @@
           <div class="league-reference">
 
             <span>
-              Lig Ort.
+              League Avg.
               {{
                 formatPercent(
                   p.league_averages.ft_rate,
@@ -913,22 +913,23 @@
 
           <p>
 
-            {{ p.player_name }},
-            {{ p.games }} maçta
+            {{ p.player_name }}
+            appeared in {{ p.games }} games
+            and averaged
             {{ formatValue(p.average_minutes) }}
-            dakika ortalama ile oynadı.
+            minutes per game.
 
-            Hücum kullanım oranı
-            {{ formatPercent(p.stats.usg_pct) }}
-            ve bu değer
+            His usage rate was
+            {{ formatPercent(p.stats.usg_pct) }},
+            placing him at
             {{ formatPercentile(p.percentiles.usg) }}
-            seviyesinde.
+            among eligible players.
 
-            True shooting yüzdesi
-            {{ formatPercent(p.stats.ts_pct) }}
-            ile
+            His true shooting percentage was
+            {{ formatPercent(p.stats.ts_pct) }},
+            ranking in the
             {{ formatTopPercent(p.percentiles.ts) }}
-            grubunda yer alıyor.
+            of the league.
 
           </p>
 
@@ -936,9 +937,10 @@
 
           <p>
 
-            {{ p.player_name }} için percentile değerlendirmesi,
-            yeterli maç veya dakika örneklemi bulunmadığı için
-            henüz gösterilmiyor.
+            Percentile evaluation is not yet available for
+            {{ p.player_name }}
+            because the player does not meet the minimum
+            games or minutes sample requirement.
 
           </p>
 

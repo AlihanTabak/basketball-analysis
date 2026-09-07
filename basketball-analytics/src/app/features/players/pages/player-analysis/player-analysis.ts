@@ -43,6 +43,7 @@ export class PlayerAnalysis {
   private readonly route =
     inject(ActivatedRoute);
 
+
   player =
     signal<PlayerAnalysisResponse | null>(null);
 
@@ -50,11 +51,15 @@ export class PlayerAnalysis {
     signal<ShotAnalysisResponse | null>(null);
 
   loading =
-    signal(true);
+    signal<boolean>(true);
 
   error =
     signal<string | null>(null);
 
+
+  /* =========================================================
+     CONSTRUCTOR
+     ========================================================= */
 
   constructor() {
 
@@ -77,13 +82,18 @@ export class PlayerAnalysis {
             );
 
 
-          if (!playerId || !seasonId) {
+          if (
+            !playerId ||
+            !seasonId
+          ) {
 
             this.error.set(
-              'Geçersiz oyuncu veya sezon.'
+              'Invalid player or season.'
             );
 
-            this.loading.set(false);
+            this.loading.set(
+              false
+            );
 
             return;
           }
@@ -98,92 +108,120 @@ export class PlayerAnalysis {
   }
 
 
+  /* =========================================================
+     LOAD PLAYER
+     ========================================================= */
+
   private loadPlayer(
-  playerId: number,
-  seasonId: number
-): void {
+    playerId: number,
+    seasonId: number
+  ): void {
 
-  this.loading.set(true);
-  this.error.set(null);
+    this.loading.set(
+      true
+    );
 
-  this.player.set(null);
-  this.shotAnalysis.set(null);
+    this.error.set(
+      null
+    );
+
+    this.player.set(
+      null
+    );
+
+    this.shotAnalysis.set(
+      null
+    );
 
 
-  combineLatest([
-    this.playerService.getAnalysis(
-      playerId,
-      seasonId
-    ),
+    combineLatest([
 
-    this.playerService.getPlayerShotAnalysis(
-      playerId,
-      seasonId
-    )
-  ])
-    .subscribe({
+      this.playerService.getAnalysis(
+        playerId,
+        seasonId
+      ),
 
-      next: ([
-        playerData,
-        shotData
-      ]) => {
+      this.playerService.getPlayerShotAnalysis(
+        playerId,
+        seasonId
+      )
 
-        console.log(
-          'PLAYER DATA:',
-          playerData
-        );
+    ])
+      .subscribe({
 
-        console.log(
-          'SHOT ANALYSIS:',
+        next: ([
+          playerData,
           shotData
-        );
+        ]) => {
 
-
-        this.player.set(
-          playerData
-        );
-
-        this.shotAnalysis.set(
-          shotData
-        );
-
-
-        this.loading.set(false);
-      },
-
-
-      error: err => {
-
-        console.error(
-          'Player loading error:',
-          err
-        );
-
-
-        if (err.status === 404) {
-
-          this.error.set(
-            'Bu oyuncu için seçilen sezonda veri bulunamadı.'
+          console.log(
+            'PLAYER DATA:',
+            playerData
           );
 
-        } else {
+          console.log(
+            'SHOT ANALYSIS:',
+            shotData
+          );
 
-          this.error.set(
-            'Oyuncu verisi alınamadı.'
+
+          this.player.set(
+            playerData
+          );
+
+          this.shotAnalysis.set(
+            shotData
+          );
+
+
+          this.loading.set(
+            false
+          );
+        },
+
+
+        error: err => {
+
+          console.error(
+            'Player loading error:',
+            err
+          );
+
+
+          if (
+            err.status === 404
+          ) {
+
+            this.error.set(
+              'No data was found for this player in the selected season.'
+            );
+
+          } else {
+
+            this.error.set(
+              'Player data could not be loaded.'
+            );
+
+          }
+
+
+          this.loading.set(
+            false
           );
         }
 
+      });
+  }
 
-        this.loading.set(false);
-      }
 
-    });
-}
+  /* =========================================================
+     FORMAT PERCENT
+     ========================================================= */
 
   /*
-   * Normal yüzde değerleri.
+   * Standard percentage values.
    *
-   * Örnek:
+   * Example:
    * TS = 58.437 -> 58.4%
    *
    * multiply=true:
@@ -210,10 +248,14 @@ export class PlayerAnalysis {
   }
 
 
+  /* =========================================================
+     FORMAT NUMBER
+     ========================================================= */
+
   /*
-   * Normal sayısal değer.
+   * Standard numeric value.
    *
-   * Örnek:
+   * Example:
    * AST/TOV = 1.6088 -> 1.61
    */
   formatNumber(
@@ -228,13 +270,19 @@ export class PlayerAnalysis {
       return '-';
     }
 
-    return value.toFixed(decimals);
+    return value.toFixed(
+      decimals
+    );
   }
 
 
+  /* =========================================================
+     FORMAT VALUE
+     ========================================================= */
+
   /*
-   * PPG / RPG / APG / MPG gibi
-   * değerler için.
+   * Used for values such as
+   * PPG / RPG / APG / MPG.
    */
   formatValue(
     value: number | null | undefined,
@@ -248,12 +296,19 @@ export class PlayerAnalysis {
       return '-';
     }
 
-    return value.toFixed(decimals);
+    return value.toFixed(
+      decimals
+    );
   }
 
 
+  /* =========================================================
+     PERCENTILE WIDTH
+     ========================================================= */
+
   /*
-   * Percentile bar genişliği.
+   * Converts percentile value
+   * into bar width.
    *
    * 75 -> 75%
    */
@@ -271,62 +326,80 @@ export class PlayerAnalysis {
     const safeValue =
       Math.max(
         0,
-        Math.min(100, value)
+        Math.min(
+          100,
+          value
+        )
       );
 
     return `${safeValue}%`;
   }
 
+
+  /* =========================================================
+     FORMAT RANK
+     ========================================================= */
+
   formatRank(
-      rank: number | null | undefined,
-      total: number | null | undefined
-    ): string {
+    rank: number | null | undefined,
+    total: number | null | undefined
+  ): string {
 
-      if (
-        rank === null ||
-        rank === undefined ||
-        total === null ||
-        total === undefined
-      ) {
-        return '-';
-      }
-
-      return `#${rank} / ${total}`;
+    if (
+      rank === null ||
+      rank === undefined ||
+      total === null ||
+      total === undefined
+    ) {
+      return '-';
     }
 
+    return `#${rank} / ${total}`;
+  }
+
+
+  /* =========================================================
+     FORMAT DIFFERENCE
+     ========================================================= */
+
   formatDifference(
-  value: number | null | undefined,
-  average: number | null | undefined,
-  multiply = false
-): string {
+    value: number | null | undefined,
+    average: number | null | undefined,
+    multiply = false
+  ): string {
 
-  if (
-    value === null ||
-    value === undefined ||
-    average === null ||
-    average === undefined
-  ) {
-    return '-';
+    if (
+      value === null ||
+      value === undefined ||
+      average === null ||
+      average === undefined
+    ) {
+      return '-';
+    }
+
+    let difference =
+      value - average;
+
+    if (
+      multiply
+    ) {
+      difference *= 100;
+    }
+
+    const sign =
+      difference > 0
+        ? '+'
+        : '';
+
+    return `${sign}${difference.toFixed(1)}`;
   }
 
-  let difference = value - average;
 
-  if (multiply) {
-    difference *= 100;
-  }
-
-  const sign =
-    difference > 0
-      ? '+'
-      : '';
-
-  return `${sign}${difference.toFixed(1)}`;
-}
-
+  /* =========================================================
+     FORMAT PERCENTILE
+     ========================================================= */
 
   /*
-   * Percentile etiketi.
-   *
    * 75.4 -> P75
    */
   formatPercentile(
@@ -344,12 +417,16 @@ export class PlayerAnalysis {
   }
 
 
+  /* =========================================================
+     FORMAT TOP PERCENT
+     ========================================================= */
+
   /*
-   * Percentile değerini
-   * "Top %" formatına çevirir.
+   * Converts percentile value
+   * into "Top X%" format.
    *
-   * P75 -> Top %25
-   * P90 -> Top %10
+   * P75 -> Top 25%
+   * P90 -> Top 10%
    */
   formatTopPercent(
     value: number | null | undefined
@@ -365,52 +442,75 @@ export class PlayerAnalysis {
     const topPercent =
       Math.max(
         1,
-        Math.round(100 - value)
+        Math.round(
+          100 - value
+        )
       );
 
-    return `Top %${topPercent}`;
+    return `Top ${topPercent}%`;
   }
+
+
+  /* =========================================================
+     DIFFERENCE CLASS
+     ========================================================= */
 
   differenceClass(
-  value: number | null | undefined,
-  leagueValue: number | null | undefined,
-  mode: 'higher-better' | 'lower-better' | 'neutral' = 'higher-better'
-): string {
+    value: number | null | undefined,
+    leagueValue: number | null | undefined,
+    mode:
+      | 'higher-better'
+      | 'lower-better'
+      | 'neutral'
+      = 'higher-better'
+  ): string {
 
-  if (
-    value === null ||
-    value === undefined ||
-    leagueValue === null ||
-    leagueValue === undefined
-  ) {
-    return 'neutral';
-  }
+    if (
+      value === null ||
+      value === undefined ||
+      leagueValue === null ||
+      leagueValue === undefined
+    ) {
+      return 'neutral';
+    }
 
-  if (mode === 'neutral') {
-    return 'neutral';
-  }
+    if (
+      mode === 'neutral'
+    ) {
+      return 'neutral';
+    }
 
-  const diff = value - leagueValue;
+    const diff =
+      value - leagueValue;
 
-  if (Math.abs(diff) < 0.01) {
-    return 'neutral';
-  }
+    if (
+      Math.abs(diff) < 0.01
+    ) {
+      return 'neutral';
+    }
 
-  if (mode === 'lower-better') {
-    return diff < 0
+    if (
+      mode === 'lower-better'
+    ) {
+
+      return diff < 0
+        ? 'positive'
+        : 'negative';
+    }
+
+    return diff > 0
       ? 'positive'
       : 'negative';
   }
 
-  return diff > 0
-    ? 'positive'
-    : 'negative';
-}
 
+  /* =========================================================
+     IMAGE ERROR
+     ========================================================= */
 
   /*
-   * TBF logosu 403 dönerse
-   * kırık görseli gizle.
+   * Hide broken team logo
+   * if the remote source returns an error.
    */
   onLogoError(
     event: Event
@@ -419,6 +519,8 @@ export class PlayerAnalysis {
     const img =
       event.target as HTMLImageElement;
 
-    img.style.display = 'none';
+    img.style.display =
+      'none';
   }
+
 }

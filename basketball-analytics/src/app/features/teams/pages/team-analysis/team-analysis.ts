@@ -28,11 +28,12 @@ import {
 @Component({
   selector: 'app-team-analysis',
   standalone: true,
-  imports: [TeamShotAnalysis],
+  imports: [
+    TeamShotAnalysis
+  ],
   templateUrl: './team-analysis.html',
   styleUrl: './team-analysis.scss'
 })
-
 export class TeamAnalysis {
 
   private readonly teamService =
@@ -57,6 +58,10 @@ export class TeamAnalysis {
   error =
     signal<string | null>(null);
 
+
+  /* =========================================================
+     CONSTRUCTOR
+     ========================================================= */
 
   constructor() {
 
@@ -85,10 +90,12 @@ export class TeamAnalysis {
           ) {
 
             this.error.set(
-              'Geçersiz takım veya sezon.'
+              'Invalid team or season.'
             );
 
-            this.loading.set(false);
+            this.loading.set(
+              false
+            );
 
             return;
           }
@@ -103,17 +110,30 @@ export class TeamAnalysis {
   }
 
 
+  /* =========================================================
+     LOAD TEAM
+     ========================================================= */
+
   private loadTeam(
     teamId: number,
     seasonId: number
   ): void {
 
-    this.loading.set(true);
+    this.loading.set(
+      true
+    );
 
-    this.error.set(null);
+    this.error.set(
+      null
+    );
 
-    this.team.set(null);
-    this.shotAnalysis.set(null);
+    this.team.set(
+      null
+    );
+
+    this.shotAnalysis.set(
+      null
+    );
 
 
     forkJoin({
@@ -137,13 +157,17 @@ export class TeamAnalysis {
           shotAnalysis
         }): void => {
 
-          this.team.set(analysis);
+          this.team.set(
+            analysis
+          );
 
           this.shotAnalysis.set(
             shotAnalysis
           );
 
-          this.loading.set(false);
+          this.loading.set(
+            false
+          );
         },
 
 
@@ -157,15 +181,21 @@ export class TeamAnalysis {
           );
 
           this.error.set(
-            'Takım verisi alınamadı.'
+            'Team data could not be loaded.'
           );
 
-          this.loading.set(false);
+          this.loading.set(
+            false
+          );
         }
 
       });
   }
 
+
+  /* =========================================================
+     PLAYER NAVIGATION
+     ========================================================= */
 
   openPlayer(
     playerId: number,
@@ -183,6 +213,10 @@ export class TeamAnalysis {
   }
 
 
+  /* =========================================================
+     FORMAT VALUE
+     ========================================================= */
+
   formatValue(
     value: number | null | undefined,
     decimals = 1
@@ -195,9 +229,15 @@ export class TeamAnalysis {
       return '-';
     }
 
-    return value.toFixed(decimals);
+    return value.toFixed(
+      decimals
+    );
   }
 
+
+  /* =========================================================
+     FORMAT PERCENT
+     ========================================================= */
 
   formatPercent(
     value: number | null | undefined
@@ -214,12 +254,18 @@ export class TeamAnalysis {
   }
 
 
+  /* =========================================================
+     WIN PERCENTAGE
+     ========================================================= */
+
   winPct(
     wins: number,
     games: number
   ): string {
 
-    if (!games) {
+    if (
+      !games
+    ) {
       return '-';
     }
 
@@ -228,6 +274,10 @@ export class TeamAnalysis {
     ).toFixed(1)}%`;
   }
 
+
+  /* =========================================================
+     PERCENTILE WIDTH
+     ========================================================= */
 
   percentileWidth(
     value: number | null | undefined
@@ -253,6 +303,10 @@ export class TeamAnalysis {
   }
 
 
+  /* =========================================================
+     FORMAT PERCENTILE
+     ========================================================= */
+
   formatPercentile(
     value: number | null | undefined
   ): string {
@@ -267,6 +321,10 @@ export class TeamAnalysis {
     return `P${Math.round(value)}`;
   }
 
+
+  /* =========================================================
+     FORMAT RANK
+     ========================================================= */
 
   formatRank(
     rank: number | null | undefined,
@@ -285,6 +343,10 @@ export class TeamAnalysis {
     return `#${rank} / ${total}`;
   }
 
+
+  /* =========================================================
+     DIFFERENCE
+     ========================================================= */
 
   difference(
     value: number | null | undefined,
@@ -313,6 +375,10 @@ export class TeamAnalysis {
   }
 
 
+  /* =========================================================
+     DIFFERENCE CLASS
+     ========================================================= */
+
   differenceClass(
     value: number | null | undefined,
     average: number | null | undefined,
@@ -328,7 +394,9 @@ export class TeamAnalysis {
       return '';
     }
 
-    if (value === average) {
+    if (
+      value === average
+    ) {
       return 'neutral';
     }
 
@@ -342,6 +410,10 @@ export class TeamAnalysis {
       : 'negative';
   }
 
+
+  /* =========================================================
+     IMAGE ERROR
+     ========================================================= */
 
   onLogoError(
     event: Event

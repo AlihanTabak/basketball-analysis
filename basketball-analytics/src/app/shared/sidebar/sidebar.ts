@@ -12,7 +12,6 @@ import {
 
 import {
   Navigation,
-  SeasonOption,
   TeamOption,
   PlayerOption
 } from '../../core/navigation';
@@ -31,6 +30,13 @@ import {
 export class Sidebar {
 
   /* =========================================================
+     CURRENT SEASON
+     ========================================================= */
+
+  readonly currentSeasonId = 172;
+
+
+  /* =========================================================
      SERVICES
      ========================================================= */
 
@@ -45,9 +51,6 @@ export class Sidebar {
      DATA
      ========================================================= */
 
-  seasons =
-    signal<SeasonOption[]>([]);
-
   teams =
     signal<TeamOption[]>([]);
 
@@ -58,9 +61,6 @@ export class Sidebar {
   /* =========================================================
      SELECTED VALUES
      ========================================================= */
-
-  selectedSeasonId =
-    signal<number>(172);
 
   selectedTeamId =
     signal<number | null>(null);
@@ -86,140 +86,7 @@ export class Sidebar {
 
   constructor() {
 
-    this.loadSeasons();
-
-  }
-
-
-  /* =========================================================
-     SEASONS
-     ========================================================= */
-
-  private loadSeasons(): void {
-
-    this.navigation
-      .getSeasons()
-      .subscribe({
-
-        next: seasons => {
-
-          this.seasons.set(
-            seasons
-          );
-
-
-          /*
-           * Varsayılan sezon:
-           * 2025-2026
-           */
-
-          const defaultSeason =
-            seasons.find(
-              season =>
-                season.season_id === 172
-            );
-
-
-          if (defaultSeason) {
-
-            this.selectedSeasonId.set(
-              defaultSeason.season_id
-            );
-
-            this.loadTeams(
-              defaultSeason.season_id
-            );
-
-            return;
-          }
-
-
-          /*
-           * 172 bulunamazsa ilk sezonu kullan.
-           */
-
-          if (seasons.length > 0) {
-
-            const firstSeason =
-              seasons[0];
-
-            this.selectedSeasonId.set(
-              firstSeason.season_id
-            );
-
-            this.loadTeams(
-              firstSeason.season_id
-            );
-
-          }
-
-        },
-
-
-        error: err => {
-
-          console.error(
-            'Season loading error',
-            err
-          );
-
-        }
-
-      });
-
-  }
-
-
-  /* =========================================================
-     SEASON CHANGE
-     ========================================================= */
-
-  onSeasonChange(
-    event: Event
-  ): void {
-
-    const select =
-      event.target as HTMLSelectElement;
-
-    const seasonId =
-      Number(select.value);
-
-
-    if (!seasonId) {
-      return;
-    }
-
-
-    this.selectedSeasonId.set(
-      seasonId
-    );
-
-
-    /*
-     * Sezon değiştiğinde eski team/player
-     * seçimlerini temizliyoruz.
-     */
-
-    this.selectedTeamId.set(
-      null
-    );
-
-    this.selectedPlayerId.set(
-      null
-    );
-
-    this.teams.set([]);
-
-    this.players.set([]);
-
-
-    /*
-     * Yeni sezonun takımlarını yükle.
-     */
-
-    this.loadTeams(
-      seasonId
-    );
+    this.loadTeams();
 
   }
 
@@ -228,9 +95,7 @@ export class Sidebar {
      TEAMS
      ========================================================= */
 
-  private loadTeams(
-    seasonId: number
-  ): void {
+  private loadTeams(): void {
 
     this.loadingTeams.set(
       true
@@ -239,7 +104,7 @@ export class Sidebar {
 
     this.navigation
       .getTeams(
-        seasonId
+        this.currentSeasonId
       )
       .subscribe({
 
@@ -291,10 +156,6 @@ export class Sidebar {
       Number(select.value);
 
 
-    /*
-     * "Select team" seçilmişse temizle.
-     */
-
     if (!teamId) {
 
       this.selectedTeamId.set(
@@ -312,22 +173,10 @@ export class Sidebar {
     }
 
 
-    /*
-     * Dropdown seçimini kaydet.
-     *
-     * Burada team sayfasına gitmiyoruz.
-     * Bunun için SELECT butonu kullanılacak.
-     */
-
     this.selectedTeamId.set(
       teamId
     );
 
-
-    /*
-     * Takım değişince eski player seçimini
-     * sıfırla.
-     */
 
     this.selectedPlayerId.set(
       null
@@ -336,13 +185,8 @@ export class Sidebar {
     this.players.set([]);
 
 
-    /*
-     * Player dropdown'unu doldur.
-     */
-
     this.loadPlayers(
-      teamId,
-      this.selectedSeasonId()
+      teamId
     );
 
   }
@@ -371,7 +215,7 @@ export class Sidebar {
       {
         queryParams: {
           season:
-            this.selectedSeasonId()
+            this.currentSeasonId
         }
       }
     );
@@ -384,8 +228,7 @@ export class Sidebar {
      ========================================================= */
 
   private loadPlayers(
-    teamId: number,
-    seasonId: number
+    teamId: number
   ): void {
 
     this.loadingPlayers.set(
@@ -396,7 +239,7 @@ export class Sidebar {
     this.navigation
       .getPlayers(
         teamId,
-        seasonId
+        this.currentSeasonId
       )
       .subscribe({
 
@@ -464,11 +307,6 @@ export class Sidebar {
     );
 
 
-    /*
-     * Player seçildiğinde direkt
-     * Player Analysis sayfasına git.
-     */
-
     this.router.navigate(
       [
         '/player',
@@ -477,7 +315,7 @@ export class Sidebar {
       {
         queryParams: {
           season:
-            this.selectedSeasonId()
+            this.currentSeasonId
         }
       }
     );

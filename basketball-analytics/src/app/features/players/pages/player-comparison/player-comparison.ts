@@ -18,6 +18,7 @@ import {
 
 @Component({
   selector: 'app-player-comparison',
+  standalone: true,
   imports: [],
   templateUrl: './player-comparison.html',
   styleUrl: './player-comparison.scss'
@@ -55,6 +56,10 @@ export class PlayerComparison {
   error =
     signal<string | null>(null);
 
+
+  /* =========================================================
+     CONSTRUCTOR
+     ========================================================= */
 
   constructor() {
 
@@ -96,22 +101,29 @@ export class PlayerComparison {
 
 
         /*
-         * /compare sayfasına ilk girişte
-         * player1/player2 olmayabilir.
+         * player1 and player2 may be missing
+         * when the user first enters /compare.
          *
-         * Bu bir hata değil;
-         * kullanıcı dropdown'dan seçecek.
+         * This is not an error.
+         * The user can select players
+         * from the dropdowns.
          */
         if (
           !player1 ||
           !player2
         ) {
 
-          this.data.set(null);
+          this.data.set(
+            null
+          );
 
-          this.loading.set(false);
+          this.loading.set(
+            false
+          );
 
-          this.error.set(null);
+          this.error.set(
+            null
+          );
 
           return;
         }
@@ -121,12 +133,16 @@ export class PlayerComparison {
           player1 === player2
         ) {
 
-          this.data.set(null);
+          this.data.set(
+            null
+          );
 
-          this.loading.set(false);
+          this.loading.set(
+            false
+          );
 
           this.error.set(
-            'Karşılaştırma için iki farklı oyuncu seçmelisin.'
+            'Select two different players for comparison.'
           );
 
           return;
@@ -142,11 +158,9 @@ export class PlayerComparison {
   }
 
 
-  /*
-   * =====================================================
-   * PLAYER LIST
-   * =====================================================
-   */
+  /* =========================================================
+     PLAYER LIST
+     ========================================================= */
 
   private loadPlayers(
     seasonId: number
@@ -182,11 +196,9 @@ export class PlayerComparison {
   }
 
 
-  /*
-   * =====================================================
-   * COMPARISON
-   * =====================================================
-   */
+  /* =========================================================
+     COMPARISON
+     ========================================================= */
 
   private loadComparison(
     player1: number,
@@ -194,11 +206,17 @@ export class PlayerComparison {
     seasonId: number
   ): void {
 
-    this.loading.set(true);
+    this.loading.set(
+      true
+    );
 
-    this.error.set(null);
+    this.error.set(
+      null
+    );
 
-    this.data.set(null);
+    this.data.set(
+      null
+    );
 
 
     this.comparisonApi
@@ -217,7 +235,9 @@ export class PlayerComparison {
             response
           );
 
-          this.loading.set(false);
+          this.loading.set(
+            false
+          );
         },
 
 
@@ -231,21 +251,21 @@ export class PlayerComparison {
           );
 
           this.error.set(
-            'Oyuncu karşılaştırması alınamadı.'
+            'Player comparison could not be loaded.'
           );
 
-          this.loading.set(false);
+          this.loading.set(
+            false
+          );
         }
 
       });
   }
 
 
-  /*
-   * =====================================================
-   * SELECT EVENTS
-   * =====================================================
-   */
+  /* =========================================================
+     SELECT EVENTS
+     ========================================================= */
 
   onPlayer1Change(
     event: Event
@@ -262,7 +282,9 @@ export class PlayerComparison {
       value || null
     );
 
-    this.error.set(null);
+    this.error.set(
+      null
+    );
   }
 
 
@@ -281,15 +303,15 @@ export class PlayerComparison {
       value || null
     );
 
-    this.error.set(null);
+    this.error.set(
+      null
+    );
   }
 
 
-  /*
-   * =====================================================
-   * NAVIGATION
-   * =====================================================
-   */
+  /* =========================================================
+     NAVIGATION
+     ========================================================= */
 
   compareSelected(): void {
 
@@ -306,7 +328,7 @@ export class PlayerComparison {
     ) {
 
       this.error.set(
-        'İki oyuncu seçmelisin.'
+        'Please select two players.'
       );
 
       return;
@@ -318,7 +340,7 @@ export class PlayerComparison {
     ) {
 
       this.error.set(
-        'Karşılaştırma için iki farklı oyuncu seçmelisin.'
+        'Select two different players for comparison.'
       );
 
       return;
@@ -329,23 +351,23 @@ export class PlayerComparison {
       ['/compare'],
       {
         queryParams: {
+
           season:
             this.selectedSeason(),
 
           player1,
 
           player2
+
         }
       }
     );
   }
 
 
-  /*
-   * =====================================================
-   * FORMAT HELPERS
-   * =====================================================
-   */
+  /* =========================================================
+     FORMAT VALUE
+     ========================================================= */
 
   formatValue(
     value: number | null | undefined,
@@ -364,6 +386,10 @@ export class PlayerComparison {
     );
   }
 
+
+  /* =========================================================
+     FORMAT PERCENT
+     ========================================================= */
 
   formatPercent(
     value: number | null | undefined,
@@ -385,6 +411,10 @@ export class PlayerComparison {
     return `${finalValue.toFixed(1)}%`;
   }
 
+
+  /* =========================================================
+     PERCENTILE WIDTH
+     ========================================================= */
 
   percentileWidth(
     value: number | null | undefined
@@ -410,6 +440,10 @@ export class PlayerComparison {
   }
 
 
+  /* =========================================================
+     FORMAT PERCENTILE
+     ========================================================= */
+
   formatPercentile(
     value: number | null | undefined
   ): string {
@@ -424,20 +458,67 @@ export class PlayerComparison {
     return `P${Math.round(value)}`;
   }
 
-seasonName(
-  seasonId: number
-): string {
 
-  const seasons: Record<number, string> = {
-    174: '2026-2027',
-    172: '2025-2026',
-    170: '2024-2025',
-    168: '2023-2024',
-    166: '2022-2023'
-  };
+  /* =========================================================
+     SEASON NAME
+     ========================================================= */
 
-  return seasons[seasonId]
-    ?? seasonId.toString();
+  seasonName(
+    seasonId: number
+  ): string {
+
+    const seasons:
+      Record<number, string> = {
+
+        174: '2026-2027',
+        172: '2025-2026',
+        170: '2024-2025',
+        168: '2023-2024',
+        166: '2022-2023'
+
+      };
+
+    return seasons[seasonId]
+      ?? seasonId.toString();
+  }
+
+
+  /* =========================================================
+     COMPARISON COLOR
+     ========================================================= */
+
+  comparisonClass(
+    value: number | null | undefined,
+    opponentValue: number | null | undefined,
+    higherIsBetter = true
+  ): string {
+
+    if (
+      value === null ||
+      value === undefined ||
+      opponentValue === null ||
+      opponentValue === undefined
+    ) {
+      return '';
+    }
+
+
+    if (
+      value === opponentValue
+    ) {
+      return 'comparison-equal';
+    }
+
+
+    const better =
+      higherIsBetter
+        ? value > opponentValue
+        : value < opponentValue;
+
+
+    return better
+      ? 'comparison-better'
+      : 'comparison-worse';
+  }
+
 }
-}
-

@@ -23,6 +23,7 @@ interface CourtZoneView {
   data: ShotZoneAnalysis;
 }
 
+
 interface CoachInsight {
   type:
     | 'positive'
@@ -47,410 +48,449 @@ export class PlayerShotAnalysis {
   data =
     input.required<ShotAnalysisResponse>();
 
+
   selectedZoneName =
-  signal<string | null>(null);
+    signal<string | null>(null);
+
+
+  /* =========================================================
+     COACH INSIGHTS
+     ========================================================= */
 
   coachInsights =
-  computed<CoachInsight[]>(() => {
+    computed<CoachInsight[]>(() => {
 
-    const zones =
-      this.data().zones;
+      const zones =
+        this.data().zones;
 
-    const insights:
-      CoachInsight[] = [];
-
-
-    for (const zone of zones) {
-
-      const zoneName =
-        this.formatZoneName(
-          zone.shot_zone
-        );
-
-      const profile =
-        zone.profile.zone_profile;
-
-      const fgDiff =
-        zone.shooting.fg_pct_diff;
-
-      const frequencyDiff =
-        zone.usage.frequency_diff;
+      const insights:
+        CoachInsight[] = [];
 
 
-      /* ================================================
-         PRIMARY / CLEAR STRENGTH
-      ================================================= */
+      for (const zone of zones) {
 
-      if (
-        profile === 'PRIMARY_STRENGTH' ||
-        profile === 'STRENGTH'
-      ) {
+        const zoneName =
+          this.formatZoneName(
+            zone.shot_zone
+          );
 
-        insights.push({
-          type: 'positive',
+        const profile =
+          zone.profile.zone_profile;
 
-          title: `${zoneName} güçlü bölge`,
+        const fgDiff =
+          zone.shooting.fg_pct_diff;
 
-          text:
-            `${zoneName} bölgesinde oyuncu yüksek hacimle birlikte güçlü verimlilik gösteriyor.`
-        });
+        const frequencyDiff =
+          zone.usage.frequency_diff;
 
-        continue;
+
+        /* ================================================
+           PRIMARY / CLEAR STRENGTH
+        ================================================= */
+
+        if (
+          profile === 'PRIMARY_STRENGTH' ||
+          profile === 'STRENGTH'
+        ) {
+
+          insights.push({
+            type: 'positive',
+
+            title:
+              `${zoneName} is a strength`,
+
+            text:
+              `${zoneName} combines strong efficiency with high shot volume.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           POSITIVE
+        ================================================= */
+
+        if (
+          profile === 'POSITIVE'
+        ) {
+
+          insights.push({
+            type: 'positive',
+
+            title:
+              `${zoneName} is performing well`,
+
+            text:
+              fgDiff !== null
+                ? `${zoneName} FG% is ${Math.abs(fgDiff).toFixed(1)} percentage points above the league average.`
+                : `${zoneName} shows a positive shooting profile.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           UNDERUSED STRENGTH
+        ================================================= */
+
+        if (
+          profile === 'UNDERUSED_STRENGTH'
+        ) {
+
+          insights.push({
+            type: 'positive',
+
+            title:
+              `${zoneName} could be used more`,
+
+            text:
+              `${zoneName} is an efficient shooting area but currently represents a relatively small share of the player's shot diet.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           OPPORTUNITY
+        ================================================= */
+
+        if (
+          profile === 'OPPORTUNITY'
+        ) {
+
+          insights.push({
+            type: 'positive',
+
+            title:
+              `${zoneName} presents an opportunity`,
+
+            text:
+              `${zoneName} shows positive performance and may support a higher usage level.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           OVERUSED
+        ================================================= */
+
+        if (
+          profile === 'OVERUSED'
+        ) {
+
+          insights.push({
+            type: 'warning',
+
+            title:
+              `${zoneName} may be overused`,
+
+            text:
+              fgDiff !== null
+                ? `${zoneName} is used at high volume, but FG% is ${Math.abs(fgDiff).toFixed(1)} percentage points below the league average.`
+                : `${zoneName} is used frequently despite below-average efficiency.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           WEAKNESS
+        ================================================= */
+
+        if (
+          profile === 'WEAKNESS'
+        ) {
+
+          insights.push({
+            type: 'warning',
+
+            title:
+              `${zoneName} is a weakness`,
+
+            text:
+              fgDiff !== null
+                ? `${zoneName} FG% is ${Math.abs(fgDiff).toFixed(1)} percentage points below the league average.`
+                : `${zoneName} shows below-average shooting efficiency.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           AVOID
+        ================================================= */
+
+        if (
+          profile === 'AVOID'
+        ) {
+
+          insights.push({
+            type: 'warning',
+
+            title:
+              `${zoneName} is a low-value area`,
+
+            text:
+              `${zoneName} combines low usage with low shooting efficiency.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           TENTATIVE POSITIVE
+        ================================================= */
+
+        if (
+          profile === 'TENTATIVE_STRENGTH' ||
+          profile === 'TENTATIVE_POSITIVE'
+        ) {
+
+          insights.push({
+            type: 'neutral',
+
+            title:
+              `${zoneName} shows a positive signal`,
+
+            text:
+              `${zoneName} shows encouraging performance, but the sample size is still too limited for a strong conclusion.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           TENTATIVE WEAKNESS
+        ================================================= */
+
+        if (
+          profile === 'TENTATIVE_WEAKNESS'
+        ) {
+
+          insights.push({
+            type: 'neutral',
+
+            title:
+              `${zoneName} deserves attention`,
+
+            text:
+              `${zoneName} shows a negative signal, but the sample size is too limited for a definitive evaluation.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           LIMITED SAMPLE
+        ================================================= */
+
+        if (
+          profile === 'LIMITED_SAMPLE' ||
+          profile === 'INSUFFICIENT_SAMPLE'
+        ) {
+
+          insights.push({
+            type: 'limited',
+
+            title:
+              `${zoneName} has limited data`,
+
+            text:
+              `${zoneName} does not have enough shot volume for a reliable performance evaluation.`
+          });
+
+          continue;
+        }
+
+
+        /* ================================================
+           POSSIBLE USAGE INSIGHT
+        ================================================= */
+
+        if (
+          frequencyDiff !== null &&
+          Math.abs(frequencyDiff) >= 5
+        ) {
+
+          insights.push({
+            type: 'neutral',
+
+            title:
+              `${zoneName} usage differs from the league`,
+
+            text:
+              frequencyDiff > 0
+                ? `${zoneName} represents a larger share of the player's shot diet than the league average.`
+                : `${zoneName} is used less frequently than the league average.`
+          });
+
+        }
+
       }
 
 
-      /* ================================================
-         POSITIVE
-      ================================================= */
+      /*
+       * Move the most actionable insights
+       * to the top.
+       */
 
-      if (
-        profile === 'POSITIVE'
-      ) {
+      const priority:
+        Record<CoachInsight['type'], number> = {
 
-        insights.push({
-          type: 'positive',
+          warning: 0,
+          positive: 1,
+          neutral: 2,
+          limited: 3
 
-          title: `${zoneName} pozitif`,
+        };
 
-          text:
-            fgDiff !== null
-              ? `${zoneName} bölgesindeki FG% lig ortalamasının ${Math.abs(fgDiff).toFixed(1)} puan üzerinde.`
-              : `${zoneName} bölgesinde pozitif bir performans profili var.`
-        });
 
-        continue;
+      return insights
+        .sort(
+          (a, b) =>
+            priority[a.type] -
+            priority[b.type]
+        )
+        .slice(0, 5);
+
+    });
+
+
+  /* =========================================================
+     COURT POSITIONS
+     ========================================================= */
+
+  private readonly zonePositions:
+    CourtZonePosition[] = [
+
+      // Rim area
+      {
+        zone: 'RIM',
+        x: 375,
+        y: 105
+      },
+
+      {
+        zone: 'PAINT_NON_RIM',
+        x: 375,
+        y: 205
+      },
+
+
+      // Midrange
+      {
+        zone: 'LEFT_MIDRANGE',
+        x: 205,
+        y: 285
+      },
+
+      {
+        zone: 'CENTER_MIDRANGE',
+        x: 375,
+        y: 330
+      },
+
+      {
+        zone: 'RIGHT_MIDRANGE',
+        x: 545,
+        y: 285
+      },
+
+
+      // Three-point areas
+      {
+        zone: 'LEFT_CORNER_3',
+        x: 78,
+        y: 155
+      },
+
+      {
+        zone: 'LEFT_WING_3',
+        x: 150,
+        y: 445
+      },
+
+      {
+        zone: 'TOP_3',
+        x: 375,
+        y: 525
+      },
+
+      {
+        zone: 'RIGHT_WING_3',
+        x: 600,
+        y: 445
+      },
+
+      {
+        zone: 'RIGHT_CORNER_3',
+        x: 672,
+        y: 155
       }
 
+    ];
 
-      /* ================================================
-         UNDERUSED STRENGTH
-      ================================================= */
 
-      if (
-        profile === 'UNDERUSED_STRENGTH'
-      ) {
-
-        insights.push({
-          type: 'positive',
-
-          title: `${zoneName} daha fazla kullanılabilir`,
-
-          text:
-            `${zoneName} verimli bir bölge olmasına rağmen oyuncunun şut dağılımında düşük hacimde kullanılıyor.`
-        });
-
-        continue;
-      }
-
-
-      /* ================================================
-         OPPORTUNITY
-      ================================================= */
-
-      if (
-        profile === 'OPPORTUNITY'
-      ) {
-
-        insights.push({
-          type: 'positive',
-
-          title: `${zoneName} fırsat bölgesi`,
-
-          text:
-            `${zoneName} bölgesindeki performans olumlu; mevcut kullanım seviyesi artırılabilecek bir alan olabilir.`
-        });
-
-        continue;
-      }
-
-
-      /* ================================================
-         OVERUSED
-      ================================================= */
-
-      if (
-        profile === 'OVERUSED'
-      ) {
-
-        insights.push({
-          type: 'warning',
-
-          title: `${zoneName} fazla kullanılıyor`,
-
-          text:
-            fgDiff !== null
-              ? `${zoneName} yüksek hacimde kullanılıyor ancak FG% lig ortalamasının ${Math.abs(fgDiff).toFixed(1)} puan altında.`
-              : `${zoneName} yüksek hacimde kullanılmasına rağmen verimlilik düşük.`
-        });
-
-        continue;
-      }
-
-
-      /* ================================================
-         WEAKNESS
-      ================================================= */
-
-      if (
-        profile === 'WEAKNESS'
-      ) {
-
-        insights.push({
-          type: 'warning',
-
-          title: `${zoneName} zayıf bölge`,
-
-          text:
-            fgDiff !== null
-              ? `${zoneName} bölgesindeki FG% lig ortalamasının ${Math.abs(fgDiff).toFixed(1)} puan altında.`
-              : `${zoneName} bölgesinde verimlilik düşük.`
-        });
-
-        continue;
-      }
-
-
-      /* ================================================
-         AVOID
-      ================================================= */
-
-      if (
-        profile === 'AVOID'
-      ) {
-
-        insights.push({
-          type: 'warning',
-
-          title: `${zoneName} düşük değerli bölge`,
-
-          text:
-            `${zoneName} düşük kullanım ve düşük verimlilik kombinasyonu gösteriyor.`
-        });
-
-        continue;
-      }
-
-
-      /* ================================================
-         TENTATIVE POSITIVE
-      ================================================= */
-
-      if (
-        profile === 'TENTATIVE_STRENGTH' ||
-        profile === 'TENTATIVE_POSITIVE'
-      ) {
-
-        insights.push({
-          type: 'neutral',
-
-          title: `${zoneName} olumlu sinyal`,
-
-          text:
-            `${zoneName} bölgesinde olumlu bir performans sinyali var ancak örneklem henüz güçlü bir sonuç için sınırlı.`
-        });
-
-        continue;
-      }
-
-
-      /* ================================================
-         TENTATIVE WEAKNESS
-      ================================================= */
-
-      if (
-        profile === 'TENTATIVE_WEAKNESS'
-      ) {
-
-        insights.push({
-          type: 'neutral',
-
-          title: `${zoneName} dikkat edilmeli`,
-
-          text:
-            `${zoneName} bölgesinde olumsuz bir sinyal var ancak örneklem kesin değerlendirme yapmak için sınırlı.`
-        });
-
-        continue;
-      }
-
-
-      /* ================================================
-         LIMITED SAMPLE
-      ================================================= */
-
-      if (
-        profile === 'LIMITED_SAMPLE' ||
-        profile === 'INSUFFICIENT_SAMPLE'
-      ) {
-
-        insights.push({
-          type: 'limited',
-
-          title: `${zoneName} için veri sınırlı`,
-
-          text:
-            `${zoneName} bölgesinde güvenilir performans değerlendirmesi yapmak için yeterli şut hacmi bulunmuyor.`
-        });
-
-        continue;
-      }
-
-
-      /* ================================================
-         POSSIBLE USAGE INSIGHT
-      ================================================= */
-
-      if (
-        frequencyDiff !== null &&
-        Math.abs(frequencyDiff) >= 5
-      ) {
-
-        insights.push({
-          type: 'neutral',
-
-          title: `${zoneName} kullanım farkı`,
-
-          text:
-            frequencyDiff > 0
-              ? `${zoneName}, lig ortalamasına göre oyuncunun şut dağılımında daha sık kullanılıyor.`
-              : `${zoneName}, lig ortalamasına göre daha az tercih ediliyor.`
-        });
-
-      }
-
-    }
-
-
-    /*
-     * En anlamlı olanları üste taşı.
-     */
-    const priority:
-      Record<CoachInsight['type'], number> = {
-        warning: 0,
-        positive: 1,
-        neutral: 2,
-        limited: 3
-      };
-
-
-    return insights
-      .sort(
-        (a, b) =>
-          priority[a.type] -
-          priority[b.type]
-      )
-      .slice(0, 5);
-
-  });
-
-
-  private readonly zonePositions: CourtZonePosition[] = [
-
-    // Basket çevresi
-    {
-      zone: 'RIM',
-      x: 375,
-      y: 105
-    },
-
-    {
-      zone: 'PAINT_NON_RIM',
-      x: 375,
-      y: 205
-    },
-
-
-    // Midrange
-    {
-      zone: 'LEFT_MIDRANGE',
-      x: 205,
-      y: 285
-    },
-
-    {
-      zone: 'CENTER_MIDRANGE',
-      x: 375,
-      y: 330
-    },
-
-    {
-      zone: 'RIGHT_MIDRANGE',
-      x: 545,
-      y: 285
-    },
-
-
-    // 3PT
-    {
-      zone: 'LEFT_CORNER_3',
-      x: 78,
-      y: 155
-    },
-
-    {
-      zone: 'LEFT_WING_3',
-      x: 150,
-      y: 445
-    },
-
-    {
-      zone: 'TOP_3',
-      x: 375,
-      y: 525
-    },
-
-    {
-      zone: 'RIGHT_WING_3',
-      x: 600,
-      y: 445
-    },
-
-    {
-      zone: 'RIGHT_CORNER_3',
-      x: 672,
-      y: 155
-    }
-
-  ];
+  /* =========================================================
+     SELECTED ZONE
+     ========================================================= */
 
   selectedZone =
-  computed<ShotZoneAnalysis | null>(() => {
+    computed<ShotZoneAnalysis | null>(() => {
 
-    const zones =
-      this.data().zones;
+      const zones =
+        this.data().zones;
 
-    if (zones.length === 0) {
-      return null;
-    }
-
-    const selected =
-      this.selectedZoneName();
-
-    if (selected) {
-
-      const zone =
-        zones.find(
-          item =>
-            item.shot_zone === selected
-        );
-
-      if (zone) {
-        return zone;
+      if (zones.length === 0) {
+        return null;
       }
-    }
 
-    /*
-     * İlk açılışta en yüksek FGA'lı
-     * bölgeyi göster.
-     */
-    return [...zones]
-      .sort(
-        (a, b) =>
-          b.shooting.fga -
-          a.shooting.fga
-      )[0];
-  });
+      const selected =
+        this.selectedZoneName();
 
+      if (selected) {
+
+        const zone =
+          zones.find(
+            item =>
+              item.shot_zone === selected
+          );
+
+        if (zone) {
+          return zone;
+        }
+
+      }
+
+
+      /*
+       * On initial load, show the zone
+       * with the highest FGA.
+       */
+
+      return [...zones]
+        .sort(
+          (a, b) =>
+            b.shooting.fga -
+            a.shooting.fga
+        )[0];
+
+    });
+
+
+  /* =========================================================
+     COURT ZONES
+     ========================================================= */
 
   courtZones =
     computed<CourtZoneView[]>(() => {
@@ -494,27 +534,41 @@ export class PlayerShotAnalysis {
           ): item is CourtZoneView =>
             item !== null
         );
+
     });
+
+
+  /* =========================================================
+     INTERACTIONS
+     ========================================================= */
 
   selectZone(
     zone: ShotZoneAnalysis
-    ): void {
+  ): void {
 
-      this.selectedZoneName.set(
-        zone.shot_zone
-      );
-    }
+    this.selectedZoneName.set(
+      zone.shot_zone
+    );
+
+  }
+
 
   isSelected(
-  zone: ShotZoneAnalysis
-): boolean {
+    zone: ShotZoneAnalysis
+  ): boolean {
 
-  return (
-    this.selectedZone()?.shot_zone
-    ===
-    zone.shot_zone
-  );
-}
+    return (
+      this.selectedZone()?.shot_zone
+      ===
+      zone.shot_zone
+    );
+
+  }
+
+
+  /* =========================================================
+     FORMAT HELPERS
+     ========================================================= */
 
   formatPercent(
     value: number | null | undefined
@@ -528,6 +582,7 @@ export class PlayerShotAnalysis {
     }
 
     return `${value.toFixed(1)}%`;
+
   }
 
 
@@ -543,7 +598,10 @@ export class PlayerShotAnalysis {
       return '-';
     }
 
-    return value.toFixed(decimals);
+    return value.toFixed(
+      decimals
+    );
+
   }
 
 
@@ -564,6 +622,7 @@ export class PlayerShotAnalysis {
         : '';
 
     return `${sign}${value.toFixed(1)}%`;
+
   }
 
 
@@ -596,13 +655,14 @@ export class PlayerShotAnalysis {
           'Top 3',
 
         LEFT_MIDRANGE:
-          'Left Mid',
+          'Left Midrange',
 
         RIGHT_MIDRANGE:
-          'Right Mid',
+          'Right Midrange',
 
         CENTER_MIDRANGE:
-          'Center Mid'
+          'Center Midrange'
+
       };
 
 
@@ -610,8 +670,13 @@ export class PlayerShotAnalysis {
       names[zone]
       ?? zone
     );
+
   }
 
+
+  /* =========================================================
+     PROFILE CLASS
+     ========================================================= */
 
   profileClass(
     zone: ShotZoneAnalysis
@@ -664,15 +729,75 @@ export class PlayerShotAnalysis {
 
 
     return 'neutral';
+
   }
 
+
+  /* =========================================================
+     PROFILE LABEL
+     ========================================================= */
 
   profileLabel(
     profile: string
   ): string {
 
-    return profile
-      .replaceAll('_', ' ');
+    const labels:
+      Record<string, string> = {
+
+        PRIMARY_STRENGTH:
+          'Primary Strength',
+
+        STRENGTH:
+          'Strength',
+
+        POSITIVE:
+          'Positive',
+
+        UNDERUSED_STRENGTH:
+          'Underused Strength',
+
+        OPPORTUNITY:
+          'Opportunity',
+
+        OVERUSED:
+          'Overused',
+
+        WEAKNESS:
+          'Weakness',
+
+        AVOID:
+          'Avoid',
+
+        TENTATIVE_STRENGTH:
+          'Tentative Strength',
+
+        TENTATIVE_POSITIVE:
+          'Tentative Positive',
+
+        TENTATIVE_WEAKNESS:
+          'Tentative Weakness',
+
+        LIMITED_SAMPLE:
+          'Limited Sample',
+
+        INSUFFICIENT_SAMPLE:
+          'Insufficient Sample',
+
+        NEUTRAL:
+          'Neutral'
+
+      };
+
+
+    return (
+      labels[profile]
+      ??
+      profile.replaceAll(
+        '_',
+        ' '
+      )
+    );
+
   }
 
 }

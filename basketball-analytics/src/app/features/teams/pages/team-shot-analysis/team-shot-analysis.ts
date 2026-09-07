@@ -114,70 +114,74 @@ export class TeamShotAnalysis {
     signal<boolean>(false);
 
 
+  /* =========================================================
+     COURT ZONE POSITIONS
+     ========================================================= */
+
   private readonly zonePositions:
     CourtZonePosition[] = [
 
-    {
-      zone: 'RIM',
-      x: 375,
-      y: 105
-    },
+      {
+        zone: 'RIM',
+        x: 375,
+        y: 105
+      },
 
-    {
-      zone: 'PAINT_NON_RIM',
-      x: 375,
-      y: 205
-    },
+      {
+        zone: 'PAINT_NON_RIM',
+        x: 375,
+        y: 205
+      },
 
-    {
-      zone: 'LEFT_MIDRANGE',
-      x: 205,
-      y: 285
-    },
+      {
+        zone: 'LEFT_MIDRANGE',
+        x: 205,
+        y: 285
+      },
 
-    {
-      zone: 'CENTER_MIDRANGE',
-      x: 375,
-      y: 330
-    },
+      {
+        zone: 'CENTER_MIDRANGE',
+        x: 375,
+        y: 330
+      },
 
-    {
-      zone: 'RIGHT_MIDRANGE',
-      x: 545,
-      y: 285
-    },
+      {
+        zone: 'RIGHT_MIDRANGE',
+        x: 545,
+        y: 285
+      },
 
-    {
-      zone: 'LEFT_CORNER_3',
-      x: 78,
-      y: 155
-    },
+      {
+        zone: 'LEFT_CORNER_3',
+        x: 78,
+        y: 155
+      },
 
-    {
-      zone: 'LEFT_WING_3',
-      x: 150,
-      y: 445
-    },
+      {
+        zone: 'LEFT_WING_3',
+        x: 150,
+        y: 445
+      },
 
-    {
-      zone: 'TOP_3',
-      x: 375,
-      y: 525
-    },
+      {
+        zone: 'TOP_3',
+        x: 375,
+        y: 525
+      },
 
-    {
-      zone: 'RIGHT_WING_3',
-      x: 600,
-      y: 445
-    },
+      {
+        zone: 'RIGHT_WING_3',
+        x: 600,
+        y: 445
+      },
 
-    {
-      zone: 'RIGHT_CORNER_3',
-      x: 672,
-      y: 155
-    }
+      {
+        zone: 'RIGHT_CORNER_3',
+        x: 672,
+        y: 155
+      }
 
-  ];
+    ];
 
 
   /* =========================================================
@@ -1049,7 +1053,9 @@ export class TeamShotAnalysis {
     mode: AnalysisMode
   ): void {
 
-    this.mode.set(mode);
+    this.mode.set(
+      mode
+    );
 
     this.selectedZoneName.set(
       null
@@ -1099,6 +1105,7 @@ export class TeamShotAnalysis {
             false
           );
         },
+
 
         error: error => {
 
@@ -1178,6 +1185,7 @@ export class TeamShotAnalysis {
             false
           );
         },
+
 
         error: error => {
 
@@ -1388,40 +1396,40 @@ export class TeamShotAnalysis {
     const names:
       Record<string, string> = {
 
-      RIM:
-        'Rim',
+        RIM:
+          'Rim',
 
-      PAINT_NON_RIM:
-        'Paint',
+        PAINT_NON_RIM:
+          'Paint',
 
-      LEFT_CORNER_3:
-        'Left Corner 3',
+        LEFT_CORNER_3:
+          'Left Corner 3',
 
-      RIGHT_CORNER_3:
-        'Right Corner 3',
+        RIGHT_CORNER_3:
+          'Right Corner 3',
 
-      LEFT_WING_3:
-        'Left Wing 3',
+        LEFT_WING_3:
+          'Left Wing 3',
 
-      RIGHT_WING_3:
-        'Right Wing 3',
+        RIGHT_WING_3:
+          'Right Wing 3',
 
-      TOP_3:
-        'Top 3',
+        TOP_3:
+          'Top 3',
 
-      LEFT_MIDRANGE:
-        'Left Mid',
+        LEFT_MIDRANGE:
+          'Left Midrange',
 
-      RIGHT_MIDRANGE:
-        'Right Mid',
+        RIGHT_MIDRANGE:
+          'Right Midrange',
 
-      CENTER_MIDRANGE:
-        'Center Mid'
-    };
+        CENTER_MIDRANGE:
+          'Center Midrange'
+      };
 
     return (
-      names[zone] ??
-      zone
+      names[zone]
+      ?? zone
     );
   }
 
@@ -1505,30 +1513,59 @@ export class TeamShotAnalysis {
     return `P${Math.round(value)}`;
   }
 
+
+  /* =========================================================
+     COURT LABELS
+     ========================================================= */
+
   courtZoneLabel(
-  zone: string
-): string {
+    zone: string
+  ): string {
 
-  const names: Record<string, string> = {
-    RIM: 'RIM',
-    PAINT_NON_RIM: 'PAINT',
+    const names:
+      Record<string, string> = {
 
-    LEFT_CORNER_3: 'L CORNER',
-    RIGHT_CORNER_3: 'R CORNER',
+        RIM:
+          'RIM',
 
-    LEFT_WING_3: 'L WING',
-    RIGHT_WING_3: 'R WING',
+        PAINT_NON_RIM:
+          'PAINT',
 
-    TOP_3: 'TOP 3',
+        LEFT_CORNER_3:
+          'L CORNER',
 
-    LEFT_MIDRANGE: 'L MID',
-    RIGHT_MIDRANGE: 'R MID',
-    CENTER_MIDRANGE: 'C MID'
-  };
+        RIGHT_CORNER_3:
+          'R CORNER',
 
-  return names[zone] ?? zone;
-}
+        LEFT_WING_3:
+          'L WING',
 
+        RIGHT_WING_3:
+          'R WING',
+
+        TOP_3:
+          'TOP 3',
+
+        LEFT_MIDRANGE:
+          'L MID',
+
+        RIGHT_MIDRANGE:
+          'R MID',
+
+        CENTER_MIDRANGE:
+          'C MID'
+      };
+
+    return (
+      names[zone]
+      ?? zone
+    );
+  }
+
+
+  /* =========================================================
+     PROFILE LABEL
+     ========================================================= */
 
   profileLabel(
     profile: string
@@ -1538,9 +1575,19 @@ export class TeamShotAnalysis {
       .replaceAll(
         '_',
         ' '
+      )
+      .toLowerCase()
+      .replace(
+        /\b\w/g,
+        char =>
+          char.toUpperCase()
       );
   }
 
+
+  /* =========================================================
+     INSIGHT PRIORITY
+     ========================================================= */
 
   private insightPriority(
     type: CoachInsight['type']

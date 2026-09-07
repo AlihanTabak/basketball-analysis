@@ -17,8 +17,8 @@
     </div>
 
     <div class="season-badge">
-  {{ seasonName(selectedSeason()) }}
-</div>
+      {{ seasonName(selectedSeason()) }}
+    </div>
 
   </header>
 
@@ -29,7 +29,6 @@
 
   <section class="comparison-selector">
 
-    <!-- PLAYER A -->
     <div class="selector-field">
 
       <label>
@@ -50,9 +49,7 @@
           track player.player_id + '-' + player.team_id
         ) {
 
-          <option
-            [value]="player.player_id"
-          >
+          <option [value]="player.player_id">
             {{ player.player_name }}
             — {{ player.team_name }}
           </option>
@@ -64,7 +61,6 @@
     </div>
 
 
-    <!-- PLAYER B -->
     <div class="selector-field">
 
       <label>
@@ -85,9 +81,7 @@
           track player.player_id + '-' + player.team_id
         ) {
 
-          <option
-            [value]="player.player_id"
-          >
+          <option [value]="player.player_id">
             {{ player.player_name }}
             — {{ player.team_name }}
           </option>
@@ -99,7 +93,6 @@
     </div>
 
 
-    <!-- COMPARE BUTTON -->
     <button
       class="compare-button"
       [disabled]="
@@ -137,7 +130,7 @@
   @if (loading()) {
 
     <div class="state">
-      Karşılaştırma yükleniyor...
+      Loading comparison...
     </div>
 
   }
@@ -149,7 +142,11 @@
 
   @if (!loading() && data(); as d) {
 
-    <!-- PLAYER HEADERS -->
+
+    <!-- ===================================================
+         PLAYER HEADERS
+    ==================================================== -->
+
     <section class="players">
 
       <article class="player-card">
@@ -199,10 +196,17 @@
 
     <section class="basic-stats">
 
+
       <!-- PPG -->
+
       <div class="comparison-row">
 
-        <strong>
+        <strong
+          [class]="comparisonClass(
+            d.player1.stats.ppg,
+            d.player2.stats.ppg
+          )"
+        >
           {{ formatValue(d.player1.stats.ppg) }}
         </strong>
 
@@ -210,7 +214,12 @@
           PPG
         </span>
 
-        <strong>
+        <strong
+          [class]="comparisonClass(
+            d.player2.stats.ppg,
+            d.player1.stats.ppg
+          )"
+        >
           {{ formatValue(d.player2.stats.ppg) }}
         </strong>
 
@@ -218,9 +227,15 @@
 
 
       <!-- RPG -->
+
       <div class="comparison-row">
 
-        <strong>
+        <strong
+          [class]="comparisonClass(
+            d.player1.stats.rpg,
+            d.player2.stats.rpg
+          )"
+        >
           {{ formatValue(d.player1.stats.rpg) }}
         </strong>
 
@@ -228,7 +243,12 @@
           RPG
         </span>
 
-        <strong>
+        <strong
+          [class]="comparisonClass(
+            d.player2.stats.rpg,
+            d.player1.stats.rpg
+          )"
+        >
           {{ formatValue(d.player2.stats.rpg) }}
         </strong>
 
@@ -236,9 +256,15 @@
 
 
       <!-- APG -->
+
       <div class="comparison-row">
 
-        <strong>
+        <strong
+          [class]="comparisonClass(
+            d.player1.stats.apg,
+            d.player2.stats.apg
+          )"
+        >
           {{ formatValue(d.player1.stats.apg) }}
         </strong>
 
@@ -246,7 +272,12 @@
           APG
         </span>
 
-        <strong>
+        <strong
+          [class]="comparisonClass(
+            d.player2.stats.apg,
+            d.player1.stats.apg
+          )"
+        >
           {{ formatValue(d.player2.stats.apg) }}
         </strong>
 
@@ -270,15 +301,21 @@
       </h2>
 
 
-      <!-- =================================================
-           TS%
-      ================================================== -->
+      <!-- TS% -->
 
       <div class="metric-row">
 
         <div class="metric-side left">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player1.stats.ts_pct,
+                d.player2.stats.ts_pct
+              )
+            "
+          >
 
             <span>
               {{ formatPercentile(d.player1.percentiles.ts) }}
@@ -309,7 +346,15 @@
 
         <div class="metric-side">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player2.stats.ts_pct,
+                d.player1.stats.ts_pct
+              )
+            "
+          >
 
             {{ formatPercent(d.player2.stats.ts_pct) }}
 
@@ -335,15 +380,21 @@
       </div>
 
 
-      <!-- =================================================
-           eFG%
-      ================================================== -->
+      <!-- eFG% -->
 
       <div class="metric-row">
 
         <div class="metric-side left">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player1.stats.efg_pct,
+                d.player2.stats.efg_pct
+              )
+            "
+          >
 
             <span>
               {{ formatPercentile(d.player1.percentiles.efg) }}
@@ -374,7 +425,15 @@
 
         <div class="metric-side">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player2.stats.efg_pct,
+                d.player1.stats.efg_pct
+              )
+            "
+          >
 
             {{ formatPercent(d.player2.stats.efg_pct) }}
 
@@ -400,9 +459,7 @@
       </div>
 
 
-      <!-- =================================================
-           USG%
-      ================================================== -->
+      <!-- USG% - NEUTRAL PROFILE METRIC -->
 
       <div class="metric-row">
 
@@ -465,15 +522,21 @@
       </div>
 
 
-      <!-- =================================================
-           AST%
-      ================================================== -->
+      <!-- AST% -->
 
       <div class="metric-row">
 
         <div class="metric-side left">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player1.stats.ast_pct,
+                d.player2.stats.ast_pct
+              )
+            "
+          >
 
             <span>
               {{ formatPercentile(d.player1.percentiles.ast) }}
@@ -504,7 +567,15 @@
 
         <div class="metric-side">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player2.stats.ast_pct,
+                d.player1.stats.ast_pct
+              )
+            "
+          >
 
             {{ formatPercent(d.player2.stats.ast_pct) }}
 
@@ -530,24 +601,36 @@
       </div>
 
 
-      <!-- =================================================
-           AST / TOV
-      ================================================== -->
+      <!-- AST / TOV -->
 
       <div class="metric-row">
 
         <div class="metric-side left">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player1.stats.ast_to,
+                d.player2.stats.ast_to
+              )
+            "
+          >
 
             <span>
-              {{ formatPercentile(d.player1.percentiles.ast_to) }}
+              {{
+                formatPercentile(
+                  d.player1.percentiles.ast_to
+                )
+              }}
             </span>
 
-            {{ formatValue(
-              d.player1.stats.ast_to,
-              2
-            ) }}
+            {{
+              formatValue(
+                d.player1.stats.ast_to,
+                2
+              )
+            }}
 
           </div>
 
@@ -572,15 +655,29 @@
 
         <div class="metric-side">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player2.stats.ast_to,
+                d.player1.stats.ast_to
+              )
+            "
+          >
 
-            {{ formatValue(
-              d.player2.stats.ast_to,
-              2
-            ) }}
+            {{
+              formatValue(
+                d.player2.stats.ast_to,
+                2
+              )
+            }}
 
             <span>
-              {{ formatPercentile(d.player2.percentiles.ast_to) }}
+              {{
+                formatPercentile(
+                  d.player2.percentiles.ast_to
+                )
+              }}
             </span>
 
           </div>
@@ -601,15 +698,22 @@
       </div>
 
 
-      <!-- =================================================
-           TOV%
-      ================================================== -->
+      <!-- TOV% - LOWER IS BETTER -->
 
       <div class="metric-row">
 
         <div class="metric-side left">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player1.stats.tov_pct,
+                d.player2.stats.tov_pct,
+                false
+              )
+            "
+          >
 
             <span>
               {{ formatPercentile(d.player1.percentiles.tov) }}
@@ -640,7 +744,16 @@
 
         <div class="metric-side">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player2.stats.tov_pct,
+                d.player1.stats.tov_pct,
+                false
+              )
+            "
+          >
 
             {{ formatPercent(d.player2.stats.tov_pct) }}
 
@@ -666,9 +779,7 @@
       </div>
 
 
-      <!-- =================================================
-           3P ATTEMPT RATE
-      ================================================== -->
+      <!-- 3P ATTEMPT RATE - NEUTRAL PROFILE METRIC -->
 
       <div class="metric-row">
 
@@ -677,9 +788,11 @@
           <div class="metric-value">
 
             <span>
-              {{ formatPercentile(
-                d.player1.percentiles.three_par
-              ) }}
+              {{
+                formatPercentile(
+                  d.player1.percentiles.three_par
+                )
+              }}
             </span>
 
             {{
@@ -722,9 +835,11 @@
             }}
 
             <span>
-              {{ formatPercentile(
-                d.player2.percentiles.three_par
-              ) }}
+              {{
+                formatPercentile(
+                  d.player2.percentiles.three_par
+                )
+              }}
             </span>
 
           </div>
@@ -745,20 +860,28 @@
       </div>
 
 
-      <!-- =================================================
-           FT RATE
-      ================================================== -->
+      <!-- FT RATE -->
 
       <div class="metric-row">
 
         <div class="metric-side left">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player1.stats.ft_rate,
+                d.player2.stats.ft_rate
+              )
+            "
+          >
 
             <span>
-              {{ formatPercentile(
-                d.player1.percentiles.ft_rate
-              ) }}
+              {{
+                formatPercentile(
+                  d.player1.percentiles.ft_rate
+                )
+              }}
             </span>
 
             {{
@@ -791,7 +914,15 @@
 
         <div class="metric-side">
 
-          <div class="metric-value">
+          <div
+            [class]="
+              'metric-value ' +
+              comparisonClass(
+                d.player2.stats.ft_rate,
+                d.player1.stats.ft_rate
+              )
+            "
+          >
 
             {{
               formatPercent(
@@ -801,9 +932,11 @@
             }}
 
             <span>
-              {{ formatPercentile(
-                d.player2.percentiles.ft_rate
-              ) }}
+              {{
+                formatPercentile(
+                  d.player2.percentiles.ft_rate
+                )
+              }}
             </span>
 
           </div>
@@ -847,13 +980,13 @@
       </p>
 
       <h2>
-        İki oyuncu seç
+        Select two players
       </h2>
 
       <p>
-        Aynı sezondaki iki oyuncuyu seçerek skor üretimi,
-        verimlilik, kullanım ve oyun kuruculuk profillerini
-        lig percentile'ları üzerinden karşılaştırabilirsin.
+        Select two players from the same season to compare
+        their scoring, efficiency, usage, and playmaking
+        profiles using league percentiles.
       </p>
 
     </section>
